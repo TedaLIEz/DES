@@ -36,8 +36,8 @@ int main(int argc,
   Keygen gen;
   Key key = gen.pc1(b);
   printbinary(b);
-  std::cout << key.c << std::endl;
-  std::cout << key.d << std::endl;
+  std::cout << key.c << key.d << std::endl;
+  std::cout << gen.pc2(key) << std::endl;
 
   return 0;
 }
