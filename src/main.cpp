@@ -25,24 +25,13 @@ int main(int argc,
 //  gtk_widget_show(window);
 //
 //  gtk_main();
-//  DAE dae;
   uint64_t b = 0x1234567890abcdef;
-//  printbinary(b);
-//  printbinary(dae.p(b));
-//  bitset<48> s(0x1234567890ab);
-//  std::cout << s << std::endl;
-//  auto c = dae.s(s);
-//  printbinary(c);
   Keygen gen;
   bitset<28> a(0x1234567);
-  std::cout << a << std::endl;
-  auto r = gen.leftShift(a, 2);
-  std::cout << r << std::endl;
-//  Key key = gen.pc1(b);
-//  printbinary(b);
-//  std::cout << key.c << key.d << std::endl;
-//  std::cout << gen.pc2(key) << std::endl;
-
+  auto c = gen.getK(b);
+  for (auto i = c.begin(); i != c.end(); ++i) {
+    std::cout << *i << std::endl;
+  }
   return 0;
 }
 

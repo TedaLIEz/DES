@@ -40,7 +40,7 @@ class Keygen {
  public:
   bitset<28> leftShift(bitset<28> k, int index);
   Key pc1(uint64_t key);
-  vector<Key> getK(uint64_t key);
+  vector<bitset<48>> getK(uint64_t key);
   Key leftShift(Key key, int index);
   bitset<48> pc2(Key key);
 };
