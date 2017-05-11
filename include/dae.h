@@ -2,8 +2,8 @@
 // Created by aLIEzTed on 5/10/17.
 //
 
-#ifndef GTK_DAE_H
-#define GTK_DAE_H
+#ifndef DES_DAE_H
+#define DES_DAE_H
 
 #include <iostream>
 #include <bitset>
@@ -130,29 +130,15 @@ class DAE {
       2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11
   };
 
-  void setBit(uint64_t &input, int index, bool zero);
-  void setBit(uint32_t &input, int index, bool zero);
-  int getBit(uint32_t input, int index);
-  int getBit(uint64_t input, int index);
-  /**
-   * Get the left part of 64 bits, from left to right
-   * @param in the 64 bits input
-   * @return the left part of 64 bits, from left to right
-   */
-  uint32_t leftPart(uint64_t in);
-  /**
-   * Get the right part of 64 bits, from left to right
-   * @param in the 64 bits input
-   * @return the right part of 64 bits, from left to right
-   */
-  uint32_t rightPart(uint64_t in);
+
+
 
   int sbox(int s, int i);
 
+
  public:
   std::unordered_map<int, int *> smap = {};
-  DAE(uint64_t key=0);
-//  DAE();
+  DAE(uint64_t key = 0);
   /**
    * Initial Permutation
    * @param in input 64 bits
@@ -168,21 +154,5 @@ class DAE {
 
 };
 
-inline void printbinary(uint64_t n) {
-  bitset<64> a(n);
-  std::cout << a << std::endl;
-}
 
-inline void printbinary(uint32_t n) {
-  bitset<32> a(n);
-  std::cout << a << std::endl;
-}
-
-template<size_t bits> inline
-std::bitset<bits> subbitset(std::bitset<bits> set, int min, int max) {
-  const int ignore_hi = bits - max;
-  std::bitset<bits> range = (~std::bitset<bits>() << ignore_hi) >> ignore_hi;
-  set &= range;
-  return set >> min;
-}
 #endif //GTK_DAE_H

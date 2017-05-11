@@ -1,6 +1,8 @@
 #include <iostream>
 #include <gtk/gtk.h>
 #include "dae.h"
+#include "keygen.h"
+#include "helper.h"
 //void convert(int s[]) {
 //  bitset<6> mask(0b011110);
 //  for (uint64_t i = 0; i < 64; i++) {
@@ -23,14 +25,20 @@ int main(int argc,
 //  gtk_widget_show(window);
 //
 //  gtk_main();
-  DAE dae;
-  uint32_t b = 0x12345678;
+//  DAE dae;
+  uint64_t b = 0x1234567890abcdef;
 //  printbinary(b);
 //  printbinary(dae.p(b));
-  bitset<48> s(0x1234567890ab);
-  std::cout << s << std::endl;
-  auto c = dae.s(s);
-  printbinary(c);
+//  bitset<48> s(0x1234567890ab);
+//  std::cout << s << std::endl;
+//  auto c = dae.s(s);
+//  printbinary(c);
+  Keygen gen;
+  Key key = gen.pc1(b);
+  printbinary(b);
+  std::cout << key.c << std::endl;
+  std::cout << key.d << std::endl;
+
   return 0;
 }
 

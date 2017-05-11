@@ -2,44 +2,7 @@
 // Created by aLIEzTed on 5/10/17.
 //
 #include "dae.h"
-
-void DAE::setBit(uint64_t &input, int index, bool zero) {
-  uint64_t mask = (uint64_t) (1) << (63 - index);
-  if (!zero) {
-    input = input | mask;
-  } else {
-    input = input & (~mask);
-  }
-}
-
-void DAE::setBit(uint32_t &input, int index, bool zero) {
-  uint32_t mask = (uint32_t) (1) << (31 - index);
-  if (!zero) {
-    input = input | mask;
-  } else {
-    input = input & (~mask);
-  }
-}
-
-int DAE::getBit(uint64_t input, int index) {
-  input = input >> (63 - index);
-
-  return (int) (input & 1);
-}
-
-int DAE::getBit(uint32_t input, int index) {
-  input = input >> (31 - index);
-  return (int) (input & 1);
-}
-uint32_t DAE::leftPart(uint64_t in) {
-  uint32_t rst = (uint32_t) (in >> 32);
-  return rst;
-}
-
-uint32_t DAE::rightPart(uint64_t in) {
-  uint32_t rst = (uint32_t) in;
-  return rst;
-}
+#include "helper.h"
 
 uint64_t DAE::toIP(uint64_t in) {
   uint64_t rst = in;
@@ -84,7 +47,6 @@ uint32_t DAE::p(uint32_t in) {
   }
   return rst;
 }
-
 
 
 DAE::DAE(uint64_t key) {
