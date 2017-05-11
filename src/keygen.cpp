@@ -19,7 +19,17 @@ Key Keygen::pc1(uint64_t k) {
 }
 
 Key Keygen::leftShift(Key key, int index) {
+  Key rst;
+  rst.c = leftShift(key.c, index);
+  rst.d = leftShift(key.d, index);
+  return rst;
+}
 
+bitset<28> Keygen::leftShift(bitset<28> k, int index) {
+  bitset<28> mask(~((uint64_t) ((1 << (28 - index)) - 1)));
+  bitset<28> left = (k & mask) >> (28 - index);
+  bitset<28> right = k << index;
+  return left | right;
 }
 
 bitset<48> Keygen::pc2(Key key) {

@@ -34,10 +34,14 @@ int main(int argc,
 //  auto c = dae.s(s);
 //  printbinary(c);
   Keygen gen;
-  Key key = gen.pc1(b);
-  printbinary(b);
-  std::cout << key.c << key.d << std::endl;
-  std::cout << gen.pc2(key) << std::endl;
+  bitset<28> a(0x1234567);
+  std::cout << a << std::endl;
+  auto r = gen.leftShift(a, 2);
+  std::cout << r << std::endl;
+//  Key key = gen.pc1(b);
+//  printbinary(b);
+//  std::cout << key.c << key.d << std::endl;
+//  std::cout << gen.pc2(key) << std::endl;
 
   return 0;
 }

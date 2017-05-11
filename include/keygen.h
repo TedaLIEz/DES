@@ -37,8 +37,8 @@ class Keygen {
       46, 42, 50, 36, 29, 32
   };
   int shifts[16] = {1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1};
-
  public:
+  bitset<28> leftShift(bitset<28> k, int index);
   Key pc1(uint64_t key);
   vector<Key> getK(uint64_t key);
   Key leftShift(Key key, int index);
