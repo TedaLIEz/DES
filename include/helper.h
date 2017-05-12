@@ -4,6 +4,7 @@
 
 #ifndef DES_HELPER_H
 #define DES_HELPER_H
+#include <sstream>
 #include <iostream>
 inline void printbinary(uint64_t n) {
   bitset<64> a(n);
@@ -73,5 +74,26 @@ std::bitset<bits> subbitset(std::bitset<bits> set, int min, int max) {
   set &= range;
   return set >> min;
 }
+
+template<size_t bits>
+inline std::string printHex(std::bitset<bits> bit) {
+  std::stringstream res;
+  res << hex << bit.to_ulong();
+  return res.str();
+}
+
+inline std::string printHex(uint32_t i) {
+  std::stringstream res;
+  res << hex << i;
+  return res.str();
+}
+
+
+inline std::string printHex(uint64_t i) {
+  std::stringstream res;
+  res << hex << i;
+  return res.str();
+}
+
 
 #endif //DES_HELPER_H

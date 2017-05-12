@@ -25,12 +25,16 @@ int main(int argc,
 //  gtk_widget_show(window);
 //
 //  gtk_main();
-  uint64_t b = 0x1234567890abcdef;
-  Keygen gen;
-  DAE dae(b);
-  for (auto i = dae.keys.begin(); i != dae.keys.end(); ++i) {
-    std::cout << *i << std::endl;
-  }
+  uint64_t key = 0b0110001101101111011011010111000001110101011101000110010101110010;
+  key = 0x0123456789ABCDEF;
+  DAE dae(key);
+  uint64_t msg(0b0110110001100101011000010111001001101110011010010110111001100111);
+  msg = 0x0000000000000000;
+  auto rst = dae.cipher(msg);
+  std::cout << "Debug: " << std::endl;
+  std::cout << "Msg: " << printHex(msg) << std::endl;
+  std::cout << "Key: " << printHex(key) << std::endl;
+  std::cout << "Rst: " << printHex(rst) << std::endl;
   return 0;
 }
 

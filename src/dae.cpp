@@ -51,18 +51,9 @@ uint32_t DAE::p(uint32_t in) {
   return rst;
 }
 
-Pi DAE::layer(Pi input, bitset<48> k) {
-  Pi rst;
-  rst.left = input.right;
-
-  rst.right = fproc(input.left, input.right, k);
-  return rst;
-}
-
 uint64_t DAE::reverseIP(Pi in) {
   uint64_t t = (((uint64_t) in.left) << 32) | in.right;
   auto tmp = t;
-  std::cout << std::endl;
   for (int i = 0; i < 64; ++i) {
     setBit(t, i, getBit(tmp, reverseIPmap[i] - 1) == 0);
   }
@@ -86,20 +77,27 @@ uint64_t DAE::cipher(uint64_t msg) {
   auto ip = toIP(msg);
   auto tmp = ip;
   for (int i = 0; i < 15; i++) {
-    auto pi = layer(tmp, keys[i]);
-    tmp = pi;
+    tmp = layer(tmp, keys[i]);
   }
 
   Pi last;
-  last.left = tmp.right;
-  last.right = fproc(tmp.left, tmp.right, keys[15]);
+  // The preoutput block is then R16L16 as the doc described
+  last.right = tmp.right;
+  last.left = fproc(tmp.left, tmp.right, keys[15]);
   auto rst = reverseIP(last);
   return rst;
 }
 
+Pi DAE::layer(Pi input, bitset<48> k) {
+  Pi rst;
+  rst.left = input.right;
+
+  rst.right = fproc(input.left, input.right, k);
+  return rst;
+}
+
 uint32_t DAE::fproc(uint32_t l, uint32_t r, bitset<48> k) {
-  // TODO: + here?
-  return l + f(r, k);
+  return l ^ f(r, k);
 }
 
 
