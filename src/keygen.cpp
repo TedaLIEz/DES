@@ -44,7 +44,6 @@ bitset<48> Keygen::pc2(Key key) {
   return rst;
 }
 
-// check getK, pass
 vector<bitset<48>> Keygen::getK(uint64_t key) {
   Key k = pc1(key);
   vector<bitset<48>> rst;

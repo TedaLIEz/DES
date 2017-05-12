@@ -27,10 +27,10 @@ int main(int argc,
 //  gtk_main();
   uint64_t key = 0b0110001101101111011011010111000001110101011101000110010101110010;
   key = 0x0123456789ABCDEF;
-  DAE dae(key);
+  DAE dae;
   uint64_t msg(0b0110110001100101011000010111001001101110011010010110111001100111);
   msg = 0x0000000000000000;
-  auto rst = dae.cipher(msg);
+  auto rst = dae.cipher(msg, key);
   std::cout << "Debug: " << std::endl;
   std::cout << "Msg: " << printHex(msg) << std::endl;
   std::cout << "Key: " << printHex(key) << std::endl;

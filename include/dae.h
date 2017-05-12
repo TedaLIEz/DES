@@ -163,26 +163,24 @@ class DAE {
   Pi toIP(uint64_t in);
   Pi layer(Pi input, bitset<48> k);
 
- public:
   std::unordered_map<int, int *> smap = {};
+  bitset<48> e(uint32_t in);
+  uint32_t f(uint32_t in, bitset<48> k);
+
   std::vector<bitset<48>> keys;
 
-  DAE(uint64_t key = 0);
-
-  bitset<48> e(uint32_t in);
-
-  uint32_t f(uint32_t in, bitset<48> k);
   uint32_t s(bitset<48> in);
+
   uint32_t p(uint32_t);
-
-
-
+ public:
+  DAE();
   /**
    * Encipher message
    * @param msg 64bits msg
+   * @param key the 64bits key used for encryption
    * @return 64bits output
    */
-  uint64_t cipher(uint64_t msg);
+  uint64_t cipher(uint64_t msg, uint64_t key);
 };
 
 

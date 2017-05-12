@@ -1,5 +1,6 @@
 //
 // Created by aLIEzTed on 5/10/17.
+// Implementation of DAE in mode ECB
 //
 #include "dae.h"
 #include "helper.h"
@@ -28,7 +29,6 @@ bitset<48> DAE::e(uint32_t in) {
   return rst;
 }
 
-// Done!
 uint32_t DAE::s(bitset<48> in) {
   uint32_t rst = 0;
   for (int i = 0; i < 8; i++) {
@@ -60,7 +60,7 @@ uint64_t DAE::reverseIP(Pi in) {
   return t;
 }
 
-DAE::DAE(uint64_t key) {
+DAE::DAE() {
   smap.insert({0, s1map});
   smap.insert({1, s2map});
   smap.insert({2, s3map});
@@ -69,11 +69,11 @@ DAE::DAE(uint64_t key) {
   smap.insert({5, s6map});
   smap.insert({6, s7map});
   smap.insert({7, s8map});
-  Keygen gen;
-  keys = gen.getK(key);
 }
 
-uint64_t DAE::cipher(uint64_t msg) {
+uint64_t DAE::cipher(uint64_t msg, uint64_t key) {
+  Keygen gen;
+  keys = gen.getK(key);
   auto ip = toIP(msg);
   auto tmp = ip;
   for (int i = 0; i < 15; i++) {
