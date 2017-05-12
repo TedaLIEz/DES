@@ -27,11 +27,20 @@ int main(int argc,
 //  gtk_main();
   uint64_t b = 0x1234567890abcdef;
   Keygen gen;
-  bitset<28> a(0x1234567);
-  auto c = gen.getK(b);
-  for (auto i = c.begin(); i != c.end(); ++i) {
-    std::cout << *i << std::endl;
-  }
+  DAE dae;
+  Pi rst = dae.toIP(b);
+  auto r = dae.reverseIP(rst);
+//  printbinary(rst.left);
+//  printbinary(rst.right);
+  printbinary(b);
+  std::cout << bitset<32>(rst.left) << bitset<32>(rst.right) << std::endl;
+//  printbinary(b);
+  printbinary(r);
+//  bitset<28> a(0x1234567);
+//  auto c = gen.getK(b);
+//  for (auto i = c.begin(); i != c.end(); ++i) {
+//    std::cout << *i << std::endl;
+//  }
   return 0;
 }
 

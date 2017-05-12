@@ -7,8 +7,15 @@
 
 #include <iostream>
 #include <bitset>
+#include <vector>
 #include <unordered_map>
 using namespace std;
+
+struct Pi {
+  Pi() : left(0), right(0) {}
+  uint32_t left;
+  uint32_t right;
+};
 
 class DAE {
  private:
@@ -20,6 +27,17 @@ class DAE {
                   59, 51, 43, 35, 27, 19, 11, 3,
                   61, 53, 45, 37, 29, 21, 13, 5,
                   63, 55, 47, 39, 31, 23, 15, 7};
+  int reverseIPmap[64] = {
+      40, 8, 48, 16, 56, 24, 64, 32,
+      39, 7, 47, 15, 55, 23, 63, 31,
+      38, 6, 46, 14, 54, 22, 62, 30,
+      37, 5, 45, 13, 53, 21, 61, 29,
+      36, 4, 44, 12, 52, 20, 60, 28,
+      35, 3, 43, 11, 51, 19, 59, 27,
+      34, 2, 42, 10, 50, 18, 58, 26,
+      33, 1, 41, 9, 49, 17, 57, 25
+  };
+
   int emap[48] = {32, 1, 2, 3, 4, 5,
                   4, 5, 6, 7, 8, 9,
                   8, 9, 10, 11, 12, 13,
@@ -138,20 +156,24 @@ class DAE {
 
  public:
   std::unordered_map<int, int *> smap = {};
+  std::vector<bitset<48>> keys;
+
   DAE(uint64_t key = 0);
   /**
    * Initial Permutation
    * @param in input 64 bits
    * @return permuted input
    */
-  uint64_t toIP(uint64_t in);
+  Pi toIP(uint64_t in);
 
   bitset<48> e(uint32_t in);
 
   uint32_t f(uint32_t in, bitset<48> k);
   uint32_t s(bitset<48> in);
   uint32_t p(uint32_t);
-
+  Pi layer(Pi input, bitset<48> k);
+  uint64_t reverseIP(Pi in);
+  uint64_t cipher(uint64_t msg);
 };
 
 

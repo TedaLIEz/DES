@@ -4,11 +4,14 @@
 #include "dae.h"
 #include "helper.h"
 
-uint64_t DAE::toIP(uint64_t in) {
-  uint64_t rst = in;
+Pi DAE::toIP(uint64_t in) {
+  uint64_t t = in;
   for (int i = 0; i < 64; ++i) {
-    setBit(rst, i, getBit(in, imap[i] - 1) == 0);
+    setBit(t, i, getBit(in, imap[i] - 1) == 0);
   }
+  Pi rst;
+  rst.left = leftPart(t);
+  rst.right = rightPart(t);
   return rst;
 }
 
@@ -48,6 +51,22 @@ uint32_t DAE::p(uint32_t in) {
   return rst;
 }
 
+Pi DAE::layer(Pi input, bitset<48> k) {
+  Pi rst;
+  rst.right = input.left;
+  rst.left = input.left + f(input.right, k);
+  return rst;
+}
+
+uint64_t DAE::reverseIP(Pi in) {
+  uint64_t t = (((uint64_t) in.left) << 32) | in.right;
+  auto tmp = t;
+  std::cout << std::endl;
+  for (int i = 0; i < 64; ++i) {
+    setBit(t, i, getBit(tmp, reverseIPmap[i] - 1) == 0);
+  }
+  return t;
+}
 
 DAE::DAE(uint64_t key) {
   smap.insert({0, s1map});

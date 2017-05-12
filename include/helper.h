@@ -5,9 +5,18 @@
 #ifndef DES_HELPER_H
 #define DES_HELPER_H
 #include <iostream>
+inline void printbinary(uint64_t n) {
+  bitset<64> a(n);
+  std::cout << a << std::endl;
+}
+
+inline void printbinary(uint32_t n) {
+  bitset<32> a(n);
+  std::cout << a << std::endl;
+}
+
 inline int getBit(uint64_t input, int index) {
   input = input >> (63 - index);
-
   return (int) (input & 1);
 }
 
@@ -34,15 +43,7 @@ inline void setBit(uint32_t &input, int index, bool zero) {
   }
 }
 
-inline void printbinary(uint64_t n) {
-  bitset<64> a(n);
-  std::cout << a << std::endl;
-}
 
-inline void printbinary(uint32_t n) {
-  bitset<32> a(n);
-  std::cout << a << std::endl;
-}
 
 /**
  * Get the left part of 64 bits, from left to right
