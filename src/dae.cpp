@@ -3,7 +3,7 @@
 //
 #include "dae.h"
 #include "helper.h"
-
+#include "keygen.h"
 Pi DAE::toIP(uint64_t in) {
   uint64_t t = in;
   for (int i = 0; i < 64; ++i) {
@@ -53,8 +53,9 @@ uint32_t DAE::p(uint32_t in) {
 
 Pi DAE::layer(Pi input, bitset<48> k) {
   Pi rst;
-  rst.right = input.left;
-  rst.left = input.left + f(input.right, k);
+  rst.left = input.right;
+
+  rst.right = fproc(input.left, input.right, k);
   return rst;
 }
 
@@ -77,6 +78,28 @@ DAE::DAE(uint64_t key) {
   smap.insert({5, s6map});
   smap.insert({6, s7map});
   smap.insert({7, s8map});
+  Keygen gen;
+  keys = gen.getK(key);
+}
+
+uint64_t DAE::cipher(uint64_t msg) {
+  auto ip = toIP(msg);
+  auto tmp = ip;
+  for (int i = 0; i < 15; i++) {
+    auto pi = layer(tmp, keys[i]);
+    tmp = pi;
+  }
+
+  Pi last;
+  last.left = tmp.right;
+  last.right = fproc(tmp.left, tmp.right, keys[15]);
+  auto rst = reverseIP(last);
+  return rst;
+}
+
+uint32_t DAE::fproc(uint32_t l, uint32_t r, bitset<48> k) {
+  // TODO: + here?
+  return l + f(r, k);
 }
 
 
