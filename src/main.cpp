@@ -3,6 +3,7 @@
 #include "dae.h"
 #include "keygen.h"
 #include "helper.h"
+#include <chrono>
 //void convert(int s[]) {
 //  bitset<6> mask(0b011110);
 //  for (uint64_t i = 0; i < 64; i++) {
@@ -30,13 +31,22 @@ int main(int argc,
   DAE dae;
   uint64_t msg(0b0110110001100101011000010111001001101110011010010110111001100111);
   msg = 0x0123456789ABCDEF;
+  auto start = std::chrono::high_resolution_clock::now();
   auto rst = dae.cipher(msg, key);
+  auto finish = std::chrono::high_resolution_clock::now();
+  std::cout << "Msg " << printHex(msg) << std::endl;
+  std::cout << "Key " << printHex(key) << std::endl;
+  std::cout << "Rst " << printHex(rst) << std::endl;
+  std::cout << "=============Debug=============" << std::endl;
+  std::chrono::duration<double> elapsed = finish - start;
+  std::cout << "Encipher runtime " << elapsed.count() << "s" << std::endl;
+  std::cout << "=============Debug=============" << std::endl;
+  start = std::chrono::high_resolution_clock::now();
   auto result = dae.decipher(rst, key);
-  std::cout << "Debug: " << std::endl;
-  std::cout << "Msg: " << printHex(msg) << std::endl;
-  std::cout << "Key: " << printHex(key) << std::endl;
-  std::cout << "Rst: " << printHex(rst) << std::endl;
-  std::cout << "Decipher: " << printHex(result) << std::endl;
+  finish = std::chrono::high_resolution_clock::now();
+  elapsed = finish - start;
+  std::cout << "Decipher " << printHex(result) << std::endl;
+  std::cout << "Decipher runtime " << elapsed.count() << "s" << std::endl;
   return 0;
 }
 

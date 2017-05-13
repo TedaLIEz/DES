@@ -24,7 +24,7 @@ bitset<48> DAE::e(uint32_t in) {
   bitset<48> rst;
   for (int i = 0; i < 48; i++) {
     int bit = getBit(in, emap[i] - 1);
-    rst.set((size_t) (48 - i - 1), bit);
+    rst.set((size_t) (48 - i - 1), bit == 1);
   }
   return rst;
 }
