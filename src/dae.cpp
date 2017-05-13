@@ -75,17 +75,15 @@ uint64_t DAE::cipher(uint64_t msg, uint64_t key) {
   Keygen gen;
   keys = gen.getK(key);
   auto ip = toIP(msg);
-  auto tmp = ip;
   for (int i = 0; i < 15; i++) {
-    tmp = layer(tmp, keys[i]);
+    ip = layer(ip, keys[i]);
   }
 
   Pi last;
   // The preoutput block is then R16L16 as the doc described
-  last.right = tmp.right;
-  last.left = fproc(tmp.left, tmp.right, keys[15]);
-  auto rst = reverseIP(last);
-  return rst;
+  last.right = ip.right;
+  last.left = fproc(ip.left, ip.right, keys[15]);
+  return reverseIP(last);
 }
 
 Pi DAE::layer(Pi input, bitset<48> k) {
@@ -98,6 +96,19 @@ Pi DAE::layer(Pi input, bitset<48> k) {
 
 uint32_t DAE::fproc(uint32_t l, uint32_t r, bitset<48> k) {
   return l ^ f(r, k);
+}
+
+uint64_t DAE::decipher(uint64_t encrypt, uint64_t key) {
+  Keygen gen;
+  keys = gen.getK(key);
+  auto ip = toIP(encrypt);
+  for (int i = 15; i >= 1; i--) {
+    ip = layer(ip, keys[i]);
+  }
+  Pi last;
+  last.right = ip.right;
+  last.left = fproc(ip.left, ip.right, keys[0]);
+  return reverseIP(last);
 }
 
 

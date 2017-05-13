@@ -181,6 +181,14 @@ class DAE {
    * @return 64bits output
    */
   uint64_t cipher(uint64_t msg, uint64_t key);
+
+  /**
+   * Decipher encryption
+   * @param encrypt the 64 bits encrypted msg
+   * @param key the 64bits key used for encryption
+   * @return 64bits output
+   */
+  uint64_t decipher(uint64_t encrypt, uint64_t key);
 };
 
 

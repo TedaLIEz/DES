@@ -29,12 +29,14 @@ int main(int argc,
   key = 0x0123456789ABCDEF;
   DAE dae;
   uint64_t msg(0b0110110001100101011000010111001001101110011010010110111001100111);
-  msg = 0x0000000000000000;
+  msg = 0x0123456789ABCDEF;
   auto rst = dae.cipher(msg, key);
+  auto result = dae.decipher(rst, key);
   std::cout << "Debug: " << std::endl;
   std::cout << "Msg: " << printHex(msg) << std::endl;
   std::cout << "Key: " << printHex(key) << std::endl;
   std::cout << "Rst: " << printHex(rst) << std::endl;
+  std::cout << "Decipher: " << printHex(result) << std::endl;
   return 0;
 }
 
