@@ -167,8 +167,6 @@ class DAE {
   bitset<48> e(uint32_t in);
   uint32_t f(uint32_t in, bitset<48> k);
 
-  std::vector<bitset<48>> keys;
-
   uint32_t s(bitset<48> in);
 
   uint32_t p(uint32_t);

@@ -73,7 +73,7 @@ DAE::DAE() {
 
 uint64_t DAE::cipher(uint64_t msg, uint64_t key) {
   Keygen gen;
-  keys = gen.getK(key);
+  auto keys = gen.getK(key);
   auto ip = toIP(msg);
   for (int i = 0; i < 15; i++) {
     ip = layer(ip, keys[i]);
@@ -100,7 +100,7 @@ uint32_t DAE::fproc(uint32_t l, uint32_t r, bitset<48> k) {
 
 uint64_t DAE::decipher(uint64_t encrypt, uint64_t key) {
   Keygen gen;
-  keys = gen.getK(key);
+  auto keys = gen.getK(key);
   auto ip = toIP(encrypt);
   for (int i = 15; i >= 1; i--) {
     ip = layer(ip, keys[i]);

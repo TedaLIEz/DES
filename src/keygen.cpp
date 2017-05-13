@@ -50,7 +50,6 @@ vector<bitset<48>> Keygen::getK(uint64_t key) {
   for (int i = 0; i < 16; i++) {
     Key ki = leftShift(k, shifts[i]);
     k = ki;
-    auto tmp = pc2(ki);
     rst.push_back(pc2(ki));
   }
   return rst;

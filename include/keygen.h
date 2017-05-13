@@ -37,12 +37,12 @@ class Keygen {
       46, 42, 50, 36, 29, 32
   };
   int shifts[16] = {1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1};
- public:
+  bitset<48> pc2(Key key);
   bitset<28> leftShift(bitset<28> k, int index);
   Key pc1(uint64_t key);
-  vector<bitset<48>> getK(uint64_t key);
   Key leftShift(Key key, int index);
-  bitset<48> pc2(Key key);
+ public:
+  vector<bitset<48>> getK(uint64_t key);
 };
 
 #endif //DES_KEYGEN_H
