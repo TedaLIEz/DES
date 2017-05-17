@@ -57,17 +57,26 @@ class AES {
   void inv_sub_bytes(uint8_t *state);
   void sub_word(uint8_t *w);
   void rot_word(uint8_t *w);
-  void key_expansion(uint8_t *key, uint8_t *w);
   uint8_t *w; // expanded key
- public:
-  void cipher(uint8_t *in, uint8_t *out);
-  void inv_cipher(uint8_t *in, uint8_t *out);
   int K;
   int Nb = 4;
   int Nk;
-  int Nr;
-  AES(uint8_t key[]);
-
+  uint8_t Nr;
+  void key_expansion(uint8_t *key, uint8_t *w);
+ public:
+  /**
+   * Cipher input message
+   * @param in the input
+   * @param out the output
+   */
+  void cipher(uint8_t *in, uint8_t* out);
+  /**
+   * decipher message
+   * @param in the encrypted message
+   * @param out the output message
+   */
+  void decipher(uint8_t *in, uint8_t *out);
+  AES(uint8_t key[], int keylen);
 };
 
 #endif //DES_AES_H
