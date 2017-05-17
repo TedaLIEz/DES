@@ -58,7 +58,6 @@ class AES {
   void sub_word(uint8_t *w);
   void rot_word(uint8_t *w);
   uint8_t *w; // expanded key
-  int K;
   int Nb = 4;
   int Nk;
   uint8_t Nr;

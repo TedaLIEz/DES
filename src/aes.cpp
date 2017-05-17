@@ -174,7 +174,7 @@ void AES::inv_shift_rows(uint8_t *state) {
     while (s < i) {
       tmp = state[Nb * i + Nb - 1];
 
-      for (k = Nb - 1; k > 0; k--) {
+      for (k = (uint8_t) (Nb - 1); k > 0; k--) {
         state[Nb * i + k] = state[Nb * i + k - 1];
       }
 
@@ -196,8 +196,8 @@ void AES::sub_bytes(uint8_t *state) {
 
   for (i = 0; i < 4; i++) {
     for (j = 0; j < Nb; j++) {
-      row = (state[Nb * i + j] & 0xf0) >> 4;
-      col = state[Nb * i + j] & 0x0f;
+      row = (uint8_t) ((state[Nb * i + j] & 0xf0) >> 4);
+      col = (uint8_t) (state[Nb * i + j] & 0x0f);
       state[Nb * i + j] = s_box[16 * row + col];
     }
   }
@@ -214,8 +214,8 @@ void AES::inv_sub_bytes(uint8_t *state) {
 
   for (i = 0; i < 4; i++) {
     for (j = 0; j < Nb; j++) {
-      row = (state[Nb * i + j] & 0xf0) >> 4;
-      col = state[Nb * i + j] & 0x0f;
+      row = (uint8_t) ((state[Nb * i + j] & 0xf0) >> 4);
+      col = (uint8_t) (state[Nb * i + j] & 0x0f);
       state[Nb * i + j] = inv_s_box[16 * row + col];
     }
   }
@@ -259,8 +259,8 @@ void AES::rot_word(uint8_t *w) {
 void AES::key_expansion(uint8_t *key, uint8_t *w) {
 
   uint8_t tmp[4];
-  uint8_t i, j;
-  uint8_t len = Nb * (Nr + 1);
+  uint8_t i;
+  uint8_t len = (uint8_t) (Nb * (Nr + 1));
 
   for (i = 0; i < Nk; i++) {
     w[4 * i + 0] = key[4 * i + 0];
@@ -269,7 +269,7 @@ void AES::key_expansion(uint8_t *key, uint8_t *w) {
     w[4 * i + 3] = key[4 * i + 3];
   }
 
-  for (i = Nk; i < len; i++) {
+  for (i = (uint8_t) Nk; i < len; i++) {
     tmp[0] = w[4 * (i - 1) + 0];
     tmp[1] = w[4 * (i - 1) + 1];
     tmp[2] = w[4 * (i - 1) + 2];
@@ -279,7 +279,7 @@ void AES::key_expansion(uint8_t *key, uint8_t *w) {
 
       rot_word(tmp);
       sub_word(tmp);
-      coef_add(tmp, Rcon(i / Nk), tmp);
+      coef_add(tmp, Rcon((uint8_t) (i / Nk)), tmp);
 
     } else if (Nk > 6 && i % Nk == 4) {
 
@@ -359,13 +359,16 @@ void AES::decipher(uint8_t *in, uint8_t *out) {
 AES::AES(uint8_t key[], int keylen) {
   switch (keylen) {
     default:
-    case 16: Nk = 4;
+    case 16:
+      Nk = 4;
       Nr = 10;
       break;
-    case 24: Nk = 6;
+    case 24:
+      Nk = 6;
       Nr = 12;
       break;
-    case 32: Nk = 8;
+    case 32:
+      Nk = 8;
       Nr = 14;
       break;
   }
