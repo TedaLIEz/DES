@@ -1,10 +1,3 @@
-/*
- * Advanced Encryption Standard
- * @author Dani Huertas
- * @email huertas.dani@gmail.com
- *
- * Based on the document FIPS PUB 197
- */
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -24,7 +17,7 @@ uint8_t AES::gmult(uint8_t a, uint8_t b) {
       p ^= a;
     }
 
-    hbs = a & 0x80;
+    hbs = (uint8_t) (a & 0x80);
     a <<= 1;
     if (hbs) a ^= 0x1b; // 0000 0001 0001 1011
     b >>= 1;

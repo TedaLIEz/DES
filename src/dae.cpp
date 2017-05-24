@@ -5,6 +5,7 @@
 #include "dae.h"
 #include "helper.h"
 #include "keygen.h"
+#include <fstream>
 Pi DAE::toIP(uint64_t in) {
   uint64_t t = in;
   for (int i = 0; i < 64; ++i) {
@@ -114,3 +115,102 @@ uint64_t DAE::decipher(uint64_t encrypt, uint64_t key) {
 
 
 
+int DAE::encrypt(const std::string filepath, const std::string outpath, const uint64_t key) {
+  ifstream in(filepath, ios::binary);
+  if (!in) {
+    return FILE_NOT_FOUND;
+  }
+  in.seekg(0, in.end);
+  uint64_t length = (uint64_t) in.tellg();
+  in.seekg(0, in.beg);
+  if (std::ifstream(outpath)) {
+    std::remove(outpath.c_str());
+  }
+  ofstream out(outpath, ios::binary);
+
+
+  if (!out) {
+    return FILE_OPEN_ERROR;
+  }
+
+  char* block;
+  block = new char[8];
+
+  for (int i = 0; i < (length / 8); i++) {
+    in.read(block, 8);
+    uint64_t data = *static_cast<uint64_t*>(static_cast<void*>(block));
+    uint64_t odata;
+    odata = cipher(data, key);
+
+    out.write(static_cast<char*>(static_cast<void*>(&odata)), 8);
+  }
+
+  memset(block, 0, 8);
+  int remain = (int) (length % 8);
+  if (remain) {
+    in.read(block, remain);
+    uint64_t data = *static_cast<uint64_t*>(static_cast<void*>(block));
+    uint64_t odata;
+    odata = cipher(data, key);
+    out.write(static_cast<char*>(static_cast<void*>(&odata)), 8);
+  }
+  out.write(static_cast<char*>(static_cast<void*>(&length)), 8);
+
+  in.close();
+  out.close();
+
+  return 0;
+
+}
+
+int DAE::decrypt(const std::string filepath, const std::string outpath, const uint64_t key) {
+  ifstream in(filepath, ios::binary);
+  if (!in) {
+    return FILE_NOT_FOUND;
+  }
+  if (std::ifstream(outpath)) {
+    std::remove(outpath.c_str());
+  }
+  ofstream out(outpath, ios::binary);
+
+  if (!out) {
+    return FILE_OPEN_ERROR;
+  }
+
+  in.seekg(0, in.end);
+  uint64_t length = (uint64_t) in.tellg();
+
+  char* block;
+  block = new char[8];
+
+
+  in.seekg(0, in.beg);
+  for (int i = 0; i < (length / 8) - 2; i++) {
+    in.read(block, 8);
+
+    //TODO: reverse order to bin
+    uint64_t data = *static_cast<uint64_t*>(static_cast<void*>(block));
+    uint64_t odata;
+    odata = decipher(data, key);
+
+    out.write(static_cast<char*>(static_cast<void*>(&odata)), 8);
+  }
+
+  in.read(block, 8);
+  uint64_t data = *static_cast<uint64_t*>(static_cast<void*>(block));
+  uint64_t odata;
+  odata = decipher(data, key);
+
+  in.read(block, 8);
+  uint64_t real_len = *static_cast<uint64_t*>(static_cast<void*>(block));
+
+  int remain = (int) (8 - (length - 8 - real_len));
+  out.write(static_cast<char*>(static_cast<void*>(&odata)), remain);
+
+  in.close();
+  out.close();
+
+  return 0;
+
+
+}

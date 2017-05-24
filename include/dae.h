@@ -187,6 +187,10 @@ class DAE {
    * @return 64bits output
    */
   uint64_t decipher(uint64_t encrypt, uint64_t key);
+
+  int encrypt(const std::string inpath, const std::string outpath, const uint64_t key);
+
+  int decrypt(const std::string filepath, const std::string outpath, const uint64_t key);
 };
 
 
