@@ -8,14 +8,13 @@
 #include <iostream>
 #define FILE_NOT_FOUND 1
 #define FILE_OPEN_ERROR 2
-using namespace std;
 inline void printbinary(uint64_t n) {
-  bitset<64> a(n);
+  std::bitset<64> a(n);
   std::cout << a << std::endl;
 }
 
 inline void printbinary(uint32_t n) {
-  bitset<32> a(n);
+  std::bitset<32> a(n);
   std::cout << a << std::endl;
 }
 
@@ -81,22 +80,33 @@ std::bitset<bits> subbitset(std::bitset<bits> set, int min, int max) {
 template<size_t bits>
 inline std::string printHex(std::bitset<bits> bit) {
   std::stringstream res;
-  res << hex << bit.to_ulong();
+  res << std::hex << bit.to_ulong();
   return res.str();
 }
 
 inline std::string printHex(uint32_t i) {
   std::stringstream res;
-  res << hex << i;
+  res << std::hex << i;
   return res.str();
 }
 
 
 inline std::string printHex(uint64_t i) {
   std::stringstream res;
-  res << hex << i;
+  res << std::hex << i;
   return res.str();
 }
 
+inline void convert(int s[]) {
+  std::bitset<6> mask(0b011110);
+  for (uint64_t i = 0; i < 64; i++) {
+    std::bitset<6> t(i);
+    int a = (t[5] << 1) + t[0];
+    int b = (int) ((t & mask) >> 1).to_ullong();
+    std::cout << s[a * 16 + b] << ",";
+  }
+  std::cout << std::endl;
+  std::cout << std::endl;
+}
 
 #endif //DES_HELPER_H

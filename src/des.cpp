@@ -2,7 +2,7 @@
 // Created by aLIEzTed on 5/10/17.
 // Implementation of DAE in mode ECB
 //
-#include "dae.h"
+#include "des.h"
 #include "helper.h"
 #include "keygen.h"
 #include <fstream>
@@ -185,6 +185,8 @@ int DAE::decrypt(const std::string filepath, const std::string outpath, const ui
 
 
   in.seekg(0, in.beg);
+  std::cout << "DAE: length " << length << std::endl;
+  std::cout << "DAE: i" << length / 8 - 2 << std::endl;
   for (int i = 0; i < (length / 8) - 2; i++) {
     in.read(block, 8);
 

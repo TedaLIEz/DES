@@ -76,6 +76,8 @@ class AES {
    */
   void decipher(uint8_t *in, uint8_t *out);
   AES(uint8_t key[], int keylen);
+  int encrypt(const std::string inpath, const std::string outpath);
+  int decrypt(const std::string inpath, const std::string outpath);
 };
 
 #endif //DES_AES_H

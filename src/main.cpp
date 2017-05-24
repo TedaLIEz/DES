@@ -1,5 +1,5 @@
 #include <iostream>
-#include "dae.h"
+#include "des.h"
 #include "keygen.h"
 #include "helper.h"
 #include <chrono>
@@ -8,12 +8,12 @@
 int main(int argc,
          char *argv[]) {
 
-  uint64_t key = 0b0110001101101111011011010111000001110101011101000110010101110010;
-  key = 0x0123456789ABCDEF;
-
-  DAE dae;
-  dae.encrypt("test.txt", "encrypt.txt", key);
-  dae.decrypt("encrypt.txt", "decipher.txt", key);
+//  uint64_t key = 0b0110001101101111011011010111000001110101011101000110010101110010;
+//  key = 0x0123456789ABCDEF;
+//
+//  DAE dae;
+//  dae.encrypt("test.txt", "encrypt.txt", key);
+//  dae.decrypt("encrypt.txt", "decipher.txt", key);
 //  uint64_t msg(0b0110110001100101011000010111001001101110011010010110111001100111);
 //  msg = 0x0123456789ABCDEF;
 //  auto start = std::chrono::high_resolution_clock::now();
@@ -35,11 +35,11 @@ int main(int argc,
 
 
   /* 256 bit key */
-//  uint8_t key[] = {
-//      0x00, 0x01, 0x02, 0x03,
-//      0x04, 0x05, 0x06, 0x07,
-//      0x08, 0x09, 0x0a, 0x0b,
-//      0x0c, 0x0d, 0x0e, 0x0f};
+  uint8_t key[] = {
+      0x00, 0x01, 0x02, 0x03,
+      0x04, 0x05, 0x06, 0x07,
+      0x08, 0x09, 0x0a, 0x0b,
+      0x0c, 0x0d, 0x0e, 0x0f};
 //
 //  uint8_t in[] = {
 //      0x00, 0x11, 0x22, 0x33,
@@ -50,7 +50,10 @@ int main(int argc,
 //  uint8_t out[16]; // 128
 //
 //
-//  AES aes(key, sizeof(key));
+  AES aes(key, sizeof(key));
+//  auto rst = aes.encrypt("test.txt", "encrypt.txt");
+//  std::cout << rst << std::endl;
+  aes.decrypt("encrypt.txt", "decipher.txt");
 //
 //  aes.cipher(in, out);
 //
@@ -78,15 +81,5 @@ int main(int argc,
 }
 
 
-//void convert(int s[]) {
-//  bitset<6> mask(0b011110);
-//  for (uint64_t i = 0; i < 64; i++) {
-//    bitset<6> t(i);
-//    int a = (t[5] << 1) + t[0];
-//    int b = (int) ((t & mask) >> 1).to_ullong();
-//    std::cout << s[a * 16 + b] << ",";
-//  }
-//  std::cout << std::endl;
-//  std::cout << std::endl;
-//}
+
 

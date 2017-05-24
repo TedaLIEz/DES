@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <iostream>
+#include <helper.h>
+#include <fstream>
 #include "aes.h"
 /*
  * Multiplication in GF(2^8)
@@ -367,4 +369,104 @@ AES::AES(uint8_t key[], int keylen) {
   }
   w = (uint8_t *) malloc((size_t) (Nb * (Nr + 1) * 4));
   key_expansion(key, w);
+}
+
+int AES::encrypt(const std::string inpath, const std::string outpath) {
+  std::ifstream in(inpath, std::ios::binary);
+  if (!in) {
+    return FILE_NOT_FOUND;
+  }
+  in.seekg(0, in.end);
+  uint64_t length = (uint64_t) in.tellg();
+  in.seekg(0, in.beg);
+  if (std::ifstream(outpath)) {
+    std::remove(outpath.c_str());
+  }
+  std::ofstream out(outpath, std::ios::binary);
+
+
+  if (!out) {
+    return FILE_OPEN_ERROR;
+  }
+
+  char* block;
+  block = new char[16];
+
+  for (int i = 0; i < (length * 8 / 128); i++) {
+    in.read(block, 16);
+    uint8_t* data = static_cast<uint8_t*>(static_cast<void*>(block));
+    uint8_t odata[16] = {0};
+    cipher(data, odata);
+
+    out.write(static_cast<char*>(static_cast<void*>(odata)), 16);
+  }
+
+  memset(block, 0, 16);
+  int remain = (int) (length * 8 % 128);
+  if (remain) {
+    // read by byte
+    // fixme: this didn't work :(
+    in.read(block, remain / 8);
+    uint8_t* data = static_cast<uint8_t*>(static_cast<void*>(block));
+    uint8_t odata[16] = {0};
+    cipher(data, odata);
+    out.write(static_cast<char*>(static_cast<void*>(&odata)), 16);
+  }
+  out.write(static_cast<char*>(static_cast<void*>(&length)), 16);
+
+  in.close();
+  out.close();
+
+  return 0;
+}
+
+int AES::decrypt(const std::string inpath, const std::string outpath) {
+
+  std::ifstream in(inpath, std::ios::binary);
+  if (!in) {
+    return FILE_NOT_FOUND;
+  }
+  if (std::ifstream(outpath)) {
+    std::remove(outpath.c_str());
+  }
+  std::ofstream out(outpath, std::ios::binary);
+
+  if (!out) {
+    return FILE_OPEN_ERROR;
+  }
+
+  in.seekg(0, in.end);
+  uint64_t length = (uint64_t) in.tellg();
+  in.seekg(0, in.beg);
+
+
+  char* block;
+  block = new char[16];
+  std::cout << "AES: length " << length << std::endl;
+  std::cout << "AES: i" << length / 16 - 2 << std::endl;
+  for (int i = 0; i < (length * 8 / 128) - 2; i++) {
+    in.read(block, 16);
+
+    uint8_t* data = static_cast<uint8_t*>(static_cast<void*>(block));
+    uint8_t odata[16] = {0};
+    decipher(data, odata);
+
+    out.write(static_cast<char*>(static_cast<void*>(odata)), 16);
+  }
+
+  in.read(block, 16);
+  uint8_t* data = static_cast<uint8_t*>(static_cast<void*>(block));
+  uint8_t odata[16] = {0};
+  decipher(data, odata);
+
+  in.read(block, 16);
+  uint64_t real_len = *static_cast<uint64_t*>(static_cast<void*>(block));
+
+  int remain = (int) (16 - (length - 16 - real_len));
+  out.write(static_cast<char*>(static_cast<void*>(&odata)), remain);
+
+  in.close();
+  out.close();
+
+  return 0;
 }
