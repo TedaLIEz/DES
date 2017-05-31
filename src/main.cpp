@@ -40,48 +40,48 @@ int main(int argc,
       0x04, 0x05, 0x06, 0x07,
       0x08, 0x09, 0x0a, 0x0b,
       0x0c, 0x0d, 0x0e, 0x0f};
+//////
+//  uint8_t in[] = {
+//      0x00, 0x11, 0x22, 0x33,
+//      0x44, 0x55, 0x66, 0x77,
+//      0x88, 0x99, 0xaa, 0xbb,
+//      0xcc, 0xdd, 0xee, 0xff};
+//
+//  uint8_t out[16]; // 128
 ////
-  uint8_t in[] = {
-      0x00, 0x11, 0x22, 0x33,
-      0x44, 0x55, 0x66, 0x77,
-      0x88, 0x99, 0xaa, 0xbb,
-      0xcc, 0xdd, 0xee, 0xff};
-//
-  uint8_t out[16]; // 128
-//
-//
+////
   AES aes(key, sizeof(key));
-//  auto rst = aes.encrypt("test.txt", "encrypt.txt");
-//  std::cout << rst << std::endl;
-//  aes.decrypt("encrypt.txt", "decipher.txt");
+  auto rst = aes.encrypt("test.txt", "encrypt.txt");
+  std::cout << rst << std::endl;
+  aes.decrypt("encrypt.txt", "decipher.txt");
+////
+//  aes.cipher(in, out);
+////
+//  printf("in:\n");
+//  for (int i = 0; i < 4; i++) {
+//    printf("%x %x %x %x ", in[4 * i + 0], in[4 * i + 1], in[4 * i + 2], in[4 * i + 3]);
+//  }
+//  printf("\n");
+//  printf("out:\n");
+////
+//  for (int i = 0; i < 4; i++) {
+//    printf("%x %x %x %x ", out[4 * i + 0], out[4 * i + 1], out[4 * i + 2], out[4 * i + 3]);
+//  }
+////
+//  printf("\n");
+////
+//  aes.decipher(out, in);
 //
-  aes.cipher(in, out);
+//  printf("decipher msg:\n");
+//  for (int i = 0; i < 4; i++) {
+//    printf("%x %x %x %x ", in[4 * i + 0], in[4 * i + 1], in[4 * i + 2], in[4 * i + 3]);
+//  }
 //
-  printf("in:\n");
-  for (int i = 0; i < 4; i++) {
-    printf("%x %x %x %x ", in[4 * i + 0], in[4 * i + 1], in[4 * i + 2], in[4 * i + 3]);
-  }
-  printf("\n");
-  printf("out:\n");
-//
-  for (int i = 0; i < 4; i++) {
-    printf("%x %x %x %x ", out[4 * i + 0], out[4 * i + 1], out[4 * i + 2], out[4 * i + 3]);
-  }
-//
-  printf("\n");
-//
-  aes.decipher(out, in);
-
-  printf("decipher msg:\n");
-  for (int i = 0; i < 4; i++) {
-    printf("%x %x %x %x ", in[4 * i + 0], in[4 * i + 1], in[4 * i + 2], in[4 * i + 3]);
-  }
-
-  printf("\n");
-  printf("key:\n");
-  for (int i = 0; i < 4; i++) {
-    printf("%x %x %x %x ", key[4 * i + 0], key[4 * i + 1], key[4 * i + 2], key[4 * i + 3]);
-  }
+//  printf("\n");
+//  printf("key:\n");
+//  for (int i = 0; i < 4; i++) {
+//    printf("%x %x %x %x ", key[4 * i + 0], key[4 * i + 1], key[4 * i + 2], key[4 * i + 3]);
+//  }
   return 0;
 }
 
