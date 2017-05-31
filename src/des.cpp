@@ -128,7 +128,6 @@ int DAE::encrypt(const std::string filepath, const std::string outpath, const ui
   }
   ofstream out(outpath, ios::binary);
 
-  //TODO: append file size to the head of file trice
   if (!out) {
     return FILE_OPEN_ERROR;
   }
@@ -159,7 +158,6 @@ int DAE::encrypt(const std::string filepath, const std::string outpath, const ui
     odata = cipher(data, key);
     out.write(static_cast<char*>(static_cast<void*>(&odata)), 8);
   }
-//  out.write(static_cast<char*>(static_cast<void*>(&length)), 8);
 
   in.close();
   out.close();
@@ -190,9 +188,14 @@ int DAE::decrypt(const std::string filepath, const std::string outpath, const ui
   block = new char[8];
   // the first three blocks contain the same real file size
   uint64_t real_len(0);
-  for (int i = 0; i < 3; i++) {
+  in.read(block, 8);
+  real_len = *static_cast<uint64_t*>(static_cast<void*>(block));
+  for (int i = 0; i < 2; i++) {
     in.read(block, 8);
-    real_len = *static_cast<uint64_t*>(static_cast<void*>(block));
+    auto tmp = *static_cast<uint64_t*>(static_cast<void*>(block));
+    if (tmp != real_len) {
+      return FILE_OPEN_ERROR;
+    }
   }
   std::cout << "DAE: encrypted length: " << length << std::endl;
   std::cout << "DAE: real length " << real_len << std::endl;

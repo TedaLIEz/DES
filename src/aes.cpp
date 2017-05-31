@@ -392,6 +392,10 @@ int AES::encrypt(const std::string inpath, const std::string outpath) {
   char* block;
   block = new char[16];
 
+  // write length at the head of file trice due to class spec
+  for (int i = 0; i < 3; i++) {
+    out.write(static_cast<char*>(static_cast<void*>(&length)), 16);
+  }
   for (int i = 0; i < (length * 8 / 128); i++) {
     in.read(block, 16);
     uint8_t* data = static_cast<uint8_t*>(static_cast<void*>(block));
@@ -405,14 +409,13 @@ int AES::encrypt(const std::string inpath, const std::string outpath) {
   int remain = (int) (length * 8 % 128);
   if (remain) {
     // read by byte
-    // fixme: this didn't work :(
     in.read(block, remain / 8);
     uint8_t* data = static_cast<uint8_t*>(static_cast<void*>(block));
     uint8_t odata[16] = {0};
     cipher(data, odata);
     out.write(static_cast<char*>(static_cast<void*>(&odata)), 16);
   }
-  out.write(static_cast<char*>(static_cast<void*>(&length)), 16);
+
 
   in.close();
   out.close();
@@ -442,9 +445,19 @@ int AES::decrypt(const std::string inpath, const std::string outpath) {
 
   char* block;
   block = new char[16];
-  std::cout << "AES: length " << length << std::endl;
-  std::cout << "AES: i" << length / 16 - 2 << std::endl;
-  for (int i = 0; i < (length * 8 / 128) - 2; i++) {
+  in.read(block, 16);
+  uint64_t real_len = *static_cast<uint64_t*>(static_cast<void*>(block));
+  for (int i = 0; i < 2; i++) {
+    in.read(block, 16);
+    auto tmp = *static_cast<uint64_t*>(static_cast<void*>(block));
+    if (tmp != real_len) {
+      return FILE_OPEN_ERROR;
+    }
+  }
+
+  std::cout << "AES: file length" << length << std::endl;
+  std::cout << "AES: real length " << real_len << std::endl;
+  for (int i = 0; i < (length * 8 / 128) - 4; i++) {
     in.read(block, 16);
 
     uint8_t* data = static_cast<uint8_t*>(static_cast<void*>(block));
@@ -459,10 +472,7 @@ int AES::decrypt(const std::string inpath, const std::string outpath) {
   uint8_t odata[16] = {0};
   decipher(data, odata);
 
-  in.read(block, 16);
-  uint64_t real_len = *static_cast<uint64_t*>(static_cast<void*>(block));
-
-  int remain = (int) (16 - (length - 16 - real_len));
+  int remain = (int) (16 - (length - 16 * 3- real_len));
   out.write(static_cast<char*>(static_cast<void*>(&odata)), remain);
 
   in.close();
