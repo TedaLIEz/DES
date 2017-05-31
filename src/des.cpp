@@ -128,13 +128,18 @@ int DAE::encrypt(const std::string filepath, const std::string outpath, const ui
   }
   ofstream out(outpath, ios::binary);
 
-
+  //TODO: append file size to the head of file trice
   if (!out) {
     return FILE_OPEN_ERROR;
   }
 
   char* block;
   block = new char[8];
+
+  // put file size at head of the file due to course spec
+  for (int i = 0; i < 3; i++) {
+    out.write(static_cast<char*>(static_cast<void*>(&length)), 8);
+  }
 
   for (int i = 0; i < (length / 8); i++) {
     in.read(block, 8);
@@ -154,7 +159,7 @@ int DAE::encrypt(const std::string filepath, const std::string outpath, const ui
     odata = cipher(data, key);
     out.write(static_cast<char*>(static_cast<void*>(&odata)), 8);
   }
-  out.write(static_cast<char*>(static_cast<void*>(&length)), 8);
+//  out.write(static_cast<char*>(static_cast<void*>(&length)), 8);
 
   in.close();
   out.close();
@@ -179,15 +184,19 @@ int DAE::decrypt(const std::string filepath, const std::string outpath, const ui
 
   in.seekg(0, in.end);
   uint64_t length = (uint64_t) in.tellg();
+  in.seekg(0, in.beg);
 
   char* block;
   block = new char[8];
-
-
-  in.seekg(0, in.beg);
-  std::cout << "DAE: length " << length << std::endl;
-  std::cout << "DAE: i" << length / 8 - 2 << std::endl;
-  for (int i = 0; i < (length / 8) - 2; i++) {
+  // the first three blocks contain the same real file size
+  uint64_t real_len(0);
+  for (int i = 0; i < 3; i++) {
+    in.read(block, 8);
+    real_len = *static_cast<uint64_t*>(static_cast<void*>(block));
+  }
+  std::cout << "DAE: encrypted length: " << length << std::endl;
+  std::cout << "DAE: real length " << real_len << std::endl;
+  for (int i = 0; i < (length / 8) - 4; i++) {
     in.read(block, 8);
 
     //TODO: reverse order to bin
@@ -202,12 +211,9 @@ int DAE::decrypt(const std::string filepath, const std::string outpath, const ui
   uint64_t data = *static_cast<uint64_t*>(static_cast<void*>(block));
   uint64_t odata;
   odata = decipher(data, key);
-
-  in.read(block, 8);
-  uint64_t real_len = *static_cast<uint64_t*>(static_cast<void*>(block));
-
-  int remain = (int) (8 - (length - 8 - real_len));
-  out.write(static_cast<char*>(static_cast<void*>(&odata)), remain);
+  auto substr = static_cast<char*>(static_cast<void*>(&odata));
+  int remain = (int) (8 - (length - 8 * 3- real_len));
+  out.write(substr, remain);
 
   in.close();
   out.close();
