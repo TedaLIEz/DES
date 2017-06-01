@@ -4,7 +4,7 @@
 #include "helper.h"
 #include <chrono>
 #include "aes.h"
-
+#include "pcap_encode.h"
 int main(int argc,
          char *argv[]) {
 
@@ -35,11 +35,11 @@ int main(int argc,
 
 
   /* 256 bit key */
-  uint8_t key[] = {
-      0x00, 0x01, 0x02, 0x03,
-      0x04, 0x05, 0x06, 0x07,
-      0x08, 0x09, 0x0a, 0x0b,
-      0x0c, 0x0d, 0x0e, 0x0f};
+//  uint8_t key[] = {
+//      0x00, 0x01, 0x02, 0x03,
+//      0x04, 0x05, 0x06, 0x07,
+//      0x08, 0x09, 0x0a, 0x0b,
+//      0x0c, 0x0d, 0x0e, 0x0f};
 //////
 //  uint8_t in[] = {
 //      0x00, 0x11, 0x22, 0x33,
@@ -50,10 +50,10 @@ int main(int argc,
 //  uint8_t out[16]; // 128
 ////
 ////
-  AES aes(key, sizeof(key));
-  auto rst = aes.encrypt("test.txt", "encrypt.txt");
-  std::cout << rst << std::endl;
-  aes.decrypt("encrypt.txt", "decipher.txt");
+//  AES aes(key, sizeof(key));
+//  auto rst = aes.encrypt("test.txt", "encrypt.txt");
+//  std::cout << rst << std::endl;
+//  aes.decrypt("encrypt.txt", "decipher.txt");
 ////
 //  aes.cipher(in, out);
 ////
@@ -82,6 +82,9 @@ int main(int argc,
 //  for (int i = 0; i < 4; i++) {
 //    printf("%x %x %x %x ", key[4 * i + 0], key[4 * i + 1], key[4 * i + 2], key[4 * i + 3]);
 //  }
+  PcapEncoder pcapEncoder;
+  pcapEncoder.read("test.pcap");
+
   return 0;
 }
 
