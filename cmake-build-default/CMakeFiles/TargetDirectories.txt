@@ -1,3 +1,0 @@
-/Users/JianGuo/ClionProjects/DES/cmake-build-default/CMakeFiles/edit_cache.dir
-/Users/JianGuo/ClionProjects/DES/cmake-build-default/CMakeFiles/rebuild_cache.dir
-/Users/JianGuo/ClionProjects/DES/cmake-build-default/CMakeFiles/des.dir
