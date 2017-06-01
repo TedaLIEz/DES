@@ -11,7 +11,7 @@ int PcapEncoder::read(const std::string filename) {
     return FILE_NOT_FOUND;
   }
   auto pcap_file_header = read_pcap_file_header(in);
-
+#ifdef MY_DEBUG
   dump("magic_number", pcap_file_header.magic_number);
   dump("version major", pcap_file_header.version_major);
   dump("version minor", pcap_file_header.version_minor);
@@ -19,6 +19,7 @@ int PcapEncoder::read(const std::string filename) {
   dump("sigfigs", pcap_file_header.sigfigs);
   dump("snaplen", pcap_file_header.snaplen);
   dump("network", pcap_file_header.network);
+#endif
   // TODO: read packet one by one and do filter
   auto pcap_packet_header = read_pcap_packet_header(in);
 //  dump("packet orilen", pcap_packet_header.orig_len);
