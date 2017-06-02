@@ -27,10 +27,25 @@ class PcapEncoder {
 
   typedef struct pcaprec_s {
     pcaprec_hdr_t hdr;         /* packet header */
-    void *data;                /* packet data */
+    char *data;                /* packet data */
   } pcaprec_t;
+  /**
+   * read the file header of pcap file
+   * @param stream input file stream
+   * @return @see pcap_hdr_t
+   */
   pcap_hdr_t read_pcap_file_header(std::istream &stream);
+  /**
+   * read packet from file
+   * @param stream input file stream
+   * @return @see pcaprec_t
+   */
   pcaprec_t read_packet(std::istream &stream);
+  /**
+   * read pcap header of each packet in file
+   * @param stream input file stream
+   * @return @see pcaprec_hdr_t
+   */
   pcaprec_hdr_t read_pcap_packet_header(std::istream &stream);
   template<typename T>
   void dump(const std::string tag, T t) {
@@ -42,6 +57,11 @@ class PcapEncoder {
               << t << std::endl;
   }
  public:
+  /**
+   * Read a pcap format file
+   * @param filename filepath of the pcap file
+   * @return <tt>0</tt> if read success, other val if falied
+   */
   int read(const std::string filename);
 };
 

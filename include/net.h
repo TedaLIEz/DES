@@ -4,7 +4,7 @@
 
 #ifndef DES_NET_H
 #define DES_NET_H
-
+#include <iostream>
 namespace Net {
 
 using addr_t = uint32_t;
@@ -12,7 +12,7 @@ using port_t = uint16_t;
 
 struct ether_header_t {
   uint8_t dst_addr[6];
-  uing8_t src_addr[6];
+  uint8_t src_addr[6];
   uint16_t llc_len;
 };
 

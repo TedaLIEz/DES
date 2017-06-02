@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 project(des)
 set(CMAKE_CXX_STANDARD 11)
-set(SOURCE_FILES src/main.cpp src/des.cpp src/keygen.cpp src/aes.cpp src/pcap_encode.cpp)
+set(SOURCE_FILES src/main.cpp src/des.cpp src/keygen.cpp src/aes.cpp src/pcap_encode.cpp src/net.cpp)
 SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DMY_DEBUG -std=c++0x -Wall")
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -std=c++0x -Wall")
 include_directories(include)

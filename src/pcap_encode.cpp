@@ -21,7 +21,15 @@ int PcapEncoder::read(const std::string filename) {
   dump("network", pcap_file_header.network);
 #endif
   // TODO: read packet one by one and do filter
-  auto pcap_packet_header = read_pcap_packet_header(in);
+//  auto packet1 = read_packet(in);
+//  auto packet2 = read_packet(in);
+//#ifdef MY_DEBUG
+//  dump("packet1 len", packet1.hdr.orig_len);
+//  dump("packet2 len", packet2.hdr.orig_len);
+//  dump("packet1 data", packet1.data);
+//  dump("packet2 data", packet2.data);
+//#endif
+
 //  dump("packet orilen", pcap_packet_header.orig_len);
   in.close();
   return 0;
@@ -50,5 +58,10 @@ PcapEncoder::pcaprec_hdr_t PcapEncoder::read_pcap_packet_header(std::istream &st
 
 
 PcapEncoder::pcaprec_t PcapEncoder::read_packet(std::istream &stream) {
-
+  pcaprec_hdr_t packet_header = read_pcap_packet_header(stream);
+  pcaprec_t packet;
+  packet.hdr = packet_header;
+  packet.data = (char *) malloc(packet_header.incl_len);
+  stream.read(packet.data, packet_header.incl_len);
+  return packet;
 }
