@@ -5,7 +5,6 @@
 #include "net.h"
 namespace Net {
 
-
 template<>
 ether_header_t load(std::istream &stream, bool ntoh) {
   ether_header_t header;
@@ -43,7 +42,7 @@ ipv4_header_t load(std::istream &stream, bool ntoh) {
   // TODO: deal with options in ipv4_header, review is needed
   auto size = header.size();
   if (size > 160) {
-    char* data = new char[size / 8];
+    char *data = new char[size / 8];
     stream.read(data, size / 8);
     header.options = data;
   }
@@ -69,12 +68,34 @@ udp_header_t load(std::istream &stream, bool ntoh) {
 template<>
 ipv6_header_t load(std::istream &stream, bool ntoh) {
   ipv6_header_t header;
-//  char* tmp = new char[1];
-//  stream.read(tmp, 1);
-//  unsigned int t = *tmp;
-//  header.version = t >>
-//  stream.read((char*) &header.version, 1);
-
+  uint32_t v_t(0);
+  stream.read((char *) &v_t, 4);
+  if (ntoh) {
+    v_t = ntohl(v_t);
+  }
+  header.version = (v_t >> 28);
+  header.traffic_class = (v_t & 0x0FFFFFFF) >> 24;
+  header.flow_label = (v_t & 0x000FFFFF);
+  stream.read((char *) &header.length, sizeof(header.length));
+  stream.read((char *) &header.next_header, sizeof(header.next_header));
+  stream.read((char *) &header.hop_limit, sizeof(header.hop_limit));
+  // TODO: review code
+  uint64_t tmp(0);
+  stream.read((char *) &tmp, 8);
+  header.src.left = tmp;
+  stream.read((char *) &tmp, 8);
+  header.src.right = tmp;
+  stream.read((char *) &tmp, 8);
+  header.dst.left = tmp;
+  stream.read((char *) &tmp, 8);
+  header.dst.right = tmp;
+  if (ntoh) {
+    header.length = ntohs(header.length);
+    header.src.left = ntohll(header.src.left);
+    header.src.right = ntohll(header.src.right);
+    header.dst.left = ntohll(header.dst.left);
+    header.dst.right = ntohll(header.dst.right);
+  }
   return header;
 }
 
@@ -85,6 +106,5 @@ uint8_t ipv4_header_t::ihl() const {
 size_t ipv4_header_t::size() const {
   return ihl() * sizeof(uint32_t);
 }
-
 
 }

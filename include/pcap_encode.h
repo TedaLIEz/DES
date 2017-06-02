@@ -20,7 +20,7 @@ class PcapEncoder {
     uint32_t network;        /* data link type */
     void dump() {
 #ifdef MY_DEBUG
-      std::cout << "===== PCAP file header ===== " << std::endl;
+      std::cout << std::endl << "===== PCAP file header ===== " << std::endl;
       ::dump("magic_number", magic_number);
       ::dump("version major", version_major);
       ::dump("version minor", version_minor);
@@ -28,7 +28,7 @@ class PcapEncoder {
       ::dump("sigfigs", sigfigs);
       ::dump("snaplen", snaplen);
       ::dump("network", network);
-      std::cout << "===== end of PCAP file header =====" << std::endl;
+      std::cout << "===== end of PCAP file header =====" << std::endl << std::endl;
 #endif
     }
   } pcap_hdr_t;
@@ -40,12 +40,12 @@ class PcapEncoder {
     uint32_t orig_len;       /* actual length of packet */
     void dump() {
 #ifdef MY_DEBUG
-      std::cout << "===== PCAP packet header ===== " << std::endl;
+      std::cout << std::endl << "===== PCAP packet header ===== " << std::endl;
       ::dump("ts_sec", ts_sec);
       ::dump("ts_usec", ts_usec);
       ::dump("incl_len", incl_len);
       ::dump("orig_len", orig_len);
-      std::cout << "===== end of PCAP packet header ===== " << std::endl;
+      std::cout << "===== end of PCAP packet header ===== " << std::endl << std::endl;
 #endif
     }
   } pcaprec_hdr_t;
@@ -56,7 +56,7 @@ class PcapEncoder {
   typedef struct _Packet {
     // TODO: hashcode for this struct
     pcaprec_hdr_t hdr;         /* packet header */
-    uint8_t type;              /* 0 for tcp, 1 for udp */
+    uint8_t type;              /* 1 for tcp, 2 for udp, 0 for others */
     port_t src_port;
     port_t dst_port;
 

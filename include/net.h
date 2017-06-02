@@ -22,7 +22,7 @@ struct ether_header_t {
 
   void dump() {
 #ifdef MY_DEBUG
-    std::cout << "=====     Ethernet header   =====" << std::endl;
+    std::cout << std::endl << "=====     Ethernet header   =====" << std::endl;
     std::cout << "dst MAC addr ";
     for (auto addr : dst_addr) {
       // dash it all
@@ -35,7 +35,7 @@ struct ether_header_t {
     }
     std::cout << std::endl;
     ::dump("llc_len", llc_len);
-    std::cout << "===== end of Ethernet header =====" << std::endl;
+    std::cout << "===== end of Ethernet header =====" << std::endl << std::endl;
 #endif
   }
 };
@@ -56,7 +56,7 @@ struct ipv4_header_t {
   size_t size() const;
   void dump() {
 #ifdef MY_DEBUG
-    std::cout << "======   IP header    =====" << std::endl;
+    std::cout << std::endl << "======   IPv4 header    =====" << std::endl;
     ::dump("ver_ihl", ver_ihl);
     ::dump("tos", tos);
     ::dump("total_length", total_length);
@@ -67,7 +67,7 @@ struct ipv4_header_t {
     ::dump("checksum", checksum);
     ::dump("src_addr", src_addr);
     ::dump("dst_addr", dst_addr);
-    std::cout << "===== end of IP header =====" << std::endl;
+    std::cout << "===== end of IPv4 header =====" << std::endl << std::endl;
 #endif
   }
 
@@ -88,6 +88,20 @@ struct ipv6_header_t {
   uint8_t hop_limit;
   struct in6_addr src;
   struct in6_addr dst;
+  void dump() {
+#ifdef MY_DEBUG
+    std::cout << std::endl << "===== IPv6 header =====" << std::endl;
+    ::dump("version", version);
+    ::dump("traffic_class", traffic_class);
+    ::dump("flow_label", flow_label);
+    ::dump("length", length);
+    ::dump("next_header", next_header);
+    ::dump("hop_limit", hop_limit);
+    std::cout << "src_addr: " << std::hex << src.left << " " << src.right << std::endl;
+    std::cout << "dst_addr: " << std::hex << dst.left << " " << dst.right << std::endl;
+    std::cout << "===== end of IPv6 header =====" << std::endl << std::endl;
+#endif
+  }
 };
 
 class udp_header_t {
@@ -98,12 +112,12 @@ class udp_header_t {
   uint16_t checksum;
   void dump() {
 #ifdef MY_DEBUG
-    std::cout << "=====     UDP header    =====" << std::endl;
+    std::cout << std::endl << "=====     UDP header    =====" << std::endl;
     std::cout << "src_port: " << src_port << std::endl;
     std::cout << "dst_port: " << dst_port << std::endl;
     std::cout << "length: " << length << std::endl;
     ::dump("checksum", checksum);
-    std::cout << "===== end of UDP header =====" << std::endl;
+    std::cout << "===== end of UDP header =====" << std::endl << std::endl;
 #endif
   }
 };

@@ -13,9 +13,14 @@ int PcapEncoder::read(const std::string filename) {
   auto pcap_file_header = read_pcap_file_header(in);
   pcap_file_header.dump();
   // TODO: read packet one by one and do filter
-  auto packet = read_packet(in);
-  std::cout << "data\n" << packet.data << std::endl;
-  packet = read_packet(in);
+  for (int i = 0; i < 6; i++) {
+    std::cout << "packet " << i << std::endl;
+    auto p = read_packet(in);
+    if (p.type) {
+      std::cout << "data\n" << p.data << std::endl << std::endl;
+    }
+  }
+
   in.close();
   return 0;
 }
@@ -61,21 +66,40 @@ PcapEncoder::Packet PcapEncoder::read_packet(std::istream &stream) {
       // udp protocol
       Net::udp_header_t udp_hdr = Net::load<Net::udp_header_t>(stream);
       udp_hdr.dump();
-      // TODO: compose UDP packet as course spec
       // udp data size in bytes
       auto bytes = udp_hdr.length - 8;
-      char* data = new char[bytes];
+      char *data = new char[bytes];
+      // fixme: some data may be broken
       stream.read(data, bytes);
       packet.data = data;
+      packet.type = 1;
     } else {
       // other transmission layer protocol, ignore them
+      stream.seekg(ipv4_hdr.total_length - (uint16_t) ipv4_hdr.size() / 8, stream.cur);
     }
   } else if (eth_hdr.llc_len == ETH_IPV6) {
     Net::ipv6_header_t ipv6_hdr = Net::load<Net::ipv6_header_t>(stream);
+    ipv6_hdr.dump();
+    if (ipv6_hdr.next_header == IP_TCP_PROTOCOL) {
+
+    } else if (ipv6_hdr.next_header == IP_UDP_PROTOCOL) {
+      Net::udp_header_t udp_hdr = Net::load<Net::udp_header_t>(stream);
+      udp_hdr.dump();
+      // udp data size in bytes
+      auto bytes = udp_hdr.length - 8;
+      char *data = new char[bytes];
+      // fixme: some data may be broken
+      stream.read(data, bytes);
+      packet.data = data;
+      packet.type = 1;
+    } else {
+      // other transmission layer protocol, ignore them
+      stream.seekg(packet_hdr.incl_len - sizeof(ipv6_hdr) - sizeof(eth_hdr), stream.cur);
+    }
   } else {
+    stream.seekg(packet_hdr.incl_len - sizeof(eth_hdr), stream.cur);
     // other network layer protocol, ignore them
   }
-
 
   return packet;
 }
