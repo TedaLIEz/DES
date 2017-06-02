@@ -3,3 +3,4 @@ cmake-build-debug/
 bin/
 cmake-build-release/
 cmake-build-default/
+.DS_Store

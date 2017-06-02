@@ -7,7 +7,9 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include "helper.h"
 class PcapEncoder {
+  using port_t = uint16_t;
   typedef struct pcap_hdr_s {
     uint32_t magic_number;   /* magic number */
     uint16_t version_major;  /* major version number */
@@ -16,6 +18,19 @@ class PcapEncoder {
     uint32_t sigfigs;        /* accuracy of timestamps */
     uint32_t snaplen;        /* max length of captured packets, in octets */
     uint32_t network;        /* data link type */
+    void dump() {
+#ifdef MY_DEBUG
+      std::cout << "===== PCAP file header ===== " << std::endl;
+      ::dump("magic_number", magic_number);
+      ::dump("version major", version_major);
+      ::dump("version minor", version_minor);
+      ::dump("thiszone", thiszone);
+      ::dump("sigfigs", sigfigs);
+      ::dump("snaplen", snaplen);
+      ::dump("network", network);
+      std::cout << "===== end of PCAP file header =====" << std::endl;
+#endif
+    }
   } pcap_hdr_t;
 
   typedef struct pcaprec_hdr_s {
@@ -23,12 +38,30 @@ class PcapEncoder {
     uint32_t ts_usec;        /* timestamp microseconds */
     uint32_t incl_len;       /* number of octets of packet saved in file */
     uint32_t orig_len;       /* actual length of packet */
+    void dump() {
+#ifdef MY_DEBUG
+      std::cout << "===== PCAP packet header ===== " << std::endl;
+      ::dump("ts_sec", ts_sec);
+      ::dump("ts_usec", ts_usec);
+      ::dump("incl_len", incl_len);
+      ::dump("orig_len", orig_len);
+      std::cout << "===== end of PCAP packet header ===== " << std::endl;
+#endif
+    }
   } pcaprec_hdr_t;
 
-  typedef struct pcaprec_s {
+  /**
+   * Packet used in code
+   */
+  typedef struct _Packet {
+    // TODO: hashcode for this struct
     pcaprec_hdr_t hdr;         /* packet header */
+    uint8_t type;              /* 0 for tcp, 1 for udp */
+    port_t src_port;
+    port_t dst_port;
+
     char *data;                /* packet data */
-  } pcaprec_t;
+  } Packet;
   /**
    * read the file header of pcap file
    * @param stream input file stream
@@ -40,22 +73,13 @@ class PcapEncoder {
    * @param stream input file stream
    * @return @see pcaprec_t
    */
-  pcaprec_t read_packet(std::istream &stream);
+  Packet read_packet(std::istream &stream);
   /**
    * read pcap header of each packet in file
    * @param stream input file stream
    * @return @see pcaprec_hdr_t
    */
   pcaprec_hdr_t read_pcap_packet_header(std::istream &stream);
-  template<typename T>
-  void dump(const std::string tag, T t) {
-    std::cout << tag << " in hex: "
-              << std::hex
-              << std::noshowbase
-              << std::setw(sizeof(T) * 2)
-              << std::setfill('0')
-              << t << std::endl;
-  }
  public:
   /**
    * Read a pcap format file

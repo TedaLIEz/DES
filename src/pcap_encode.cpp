@@ -4,33 +4,18 @@
 
 #include "pcap_encode.h"
 #include <fstream>
-#include <helper.h>
+#include "net.h"
 int PcapEncoder::read(const std::string filename) {
   std::ifstream in(filename, std::ios::binary);
   if (!in) {
     return FILE_NOT_FOUND;
   }
   auto pcap_file_header = read_pcap_file_header(in);
-#ifdef MY_DEBUG
-  dump("magic_number", pcap_file_header.magic_number);
-  dump("version major", pcap_file_header.version_major);
-  dump("version minor", pcap_file_header.version_minor);
-  dump("thiszone", pcap_file_header.thiszone);
-  dump("sigfigs", pcap_file_header.sigfigs);
-  dump("snaplen", pcap_file_header.snaplen);
-  dump("network", pcap_file_header.network);
-#endif
+  pcap_file_header.dump();
   // TODO: read packet one by one and do filter
-//  auto packet1 = read_packet(in);
-//  auto packet2 = read_packet(in);
-//#ifdef MY_DEBUG
-//  dump("packet1 len", packet1.hdr.orig_len);
-//  dump("packet2 len", packet2.hdr.orig_len);
-//  dump("packet1 data", packet1.data);
-//  dump("packet2 data", packet2.data);
-//#endif
-
-//  dump("packet orilen", pcap_packet_header.orig_len);
+  auto packet = read_packet(in);
+  std::cout << "data\n" << packet.data << std::endl;
+  packet = read_packet(in);
   in.close();
   return 0;
 }
@@ -56,12 +41,41 @@ PcapEncoder::pcaprec_hdr_t PcapEncoder::read_pcap_packet_header(std::istream &st
   return header;
 }
 
+PcapEncoder::Packet PcapEncoder::read_packet(std::istream &stream) {
+  // TODO: implement reading into a packet.
+  pcaprec_hdr_t packet_hdr = read_pcap_packet_header(stream);
+  packet_hdr.dump();
+  Packet packet;
+  packet.hdr = packet_hdr;
+  Net::ether_header_t eth_hdr = Net::load<Net::ether_header_t>(stream);
+  eth_hdr.dump();
 
-PcapEncoder::pcaprec_t PcapEncoder::read_packet(std::istream &stream) {
-  pcaprec_hdr_t packet_header = read_pcap_packet_header(stream);
-  pcaprec_t packet;
-  packet.hdr = packet_header;
-  packet.data = (char *) malloc(packet_header.incl_len);
-  stream.read(packet.data, packet_header.incl_len);
+  if (eth_hdr.llc_len == ETH_IPV4) {
+    // ipv4 in network layer
+    Net::ipv4_header_t ipv4_hdr = Net::load<Net::ipv4_header_t>(stream);
+    ipv4_hdr.dump();
+    if (ipv4_hdr.protocol == IP_TCP_PROTOCOL) {
+      // tcp protocol
+      // TODO: compose TCP packet as course spec
+    } else if (ipv4_hdr.protocol == IP_UDP_PROTOCOL) {
+      // udp protocol
+      Net::udp_header_t udp_hdr = Net::load<Net::udp_header_t>(stream);
+      udp_hdr.dump();
+      // TODO: compose UDP packet as course spec
+      // udp data size in bytes
+      auto bytes = udp_hdr.length - 8;
+      char* data = new char[bytes];
+      stream.read(data, bytes);
+      packet.data = data;
+    } else {
+      // other transmission layer protocol, ignore them
+    }
+  } else if (eth_hdr.llc_len == ETH_IPV6) {
+    Net::ipv6_header_t ipv6_hdr = Net::load<Net::ipv6_header_t>(stream);
+  } else {
+    // other network layer protocol, ignore them
+  }
+
+
   return packet;
 }

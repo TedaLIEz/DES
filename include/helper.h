@@ -6,6 +6,7 @@
 #define DES_HELPER_H
 #include <sstream>
 #include <iostream>
+#include <iomanip>
 #define FILE_NOT_FOUND 1
 #define FILE_OPEN_ERROR 2
 inline void printbinary(uint64_t n) {
@@ -107,6 +108,17 @@ inline void convert(int s[]) {
   }
   std::cout << std::endl;
   std::cout << std::endl;
+}
+
+template<typename T>
+void dump(const std::string tag, T t) {
+  std::cout << tag << " in hex: "
+            << std::hex
+            << std::uppercase
+            << std::noshowbase
+            << std::setw(sizeof(T) * 2)
+            << std::setfill('0')
+            << unsigned(t) << std::endl << std::dec;
 }
 
 #endif //DES_HELPER_H
