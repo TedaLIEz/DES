@@ -40,11 +40,16 @@ ipv4_header_t load(std::istream &stream, bool ntoh) {
   }
 
   // TODO: deal with options in ipv4_header, review is needed
-  auto size = header.size();
-  if (size > 160) {
-    char *data = new char[size / 8];
-    stream.read(data, size / 8);
-    header.options = data;
+  if (header.ihl() > 5) {
+    auto options = (header.ihl() - 5) * sizeof(uint32_t);
+    char *buffer = new char[options];
+    stream.read(buffer, options);
+    std::stringstream ss;
+    for (int i = 0; i < options; ++i) {
+      ss << std::hex << std::setw(2) << std::setfill('0') << unsigned((uint8_t) buffer[i]);
+    }
+    std::string mystr = ss.str();
+    header.options = mystr;
   }
   return header;
 }
@@ -76,7 +81,7 @@ ipv6_header_t load(std::istream &stream, bool ntoh) {
   header.version = (v_t >> 28);
   header.traffic_class = (v_t & 0x0FFFFFFF) >> 24;
   header.flow_label = (v_t & 0x000FFFFF);
-  stream.read((char *) &header.length, sizeof(header.length));
+  stream.read((char *) &header.payload_length, sizeof(header.payload_length));
   stream.read((char *) &header.next_header, sizeof(header.next_header));
   stream.read((char *) &header.hop_limit, sizeof(header.hop_limit));
   // TODO: review code
@@ -90,7 +95,7 @@ ipv6_header_t load(std::istream &stream, bool ntoh) {
   stream.read((char *) &tmp, 8);
   header.dst.right = tmp;
   if (ntoh) {
-    header.length = ntohs(header.length);
+    header.payload_length = ntohs(header.payload_length);
     header.src.left = ntohll(header.src.left);
     header.src.right = ntohll(header.src.right);
     header.dst.left = ntohll(header.dst.left);
@@ -105,6 +110,82 @@ uint8_t ipv4_header_t::ihl() const {
 
 size_t ipv4_header_t::size() const {
   return ihl() * sizeof(uint32_t);
+}
+
+template<>
+tcp_header_t load(std::istream &stream, bool ntoh) {
+  tcp_header_t header;
+  stream.read((char *) &header.src_port, sizeof(header.src_port));
+  stream.read((char *) &header.dst_port, sizeof(header.dst_port));
+  stream.read((char *) &header.seq_num, sizeof(header.seq_num));
+  stream.read((char *) &header.ack_num, sizeof(header.ack_num));
+  uint8_t t;
+  stream.read((char *) &t, sizeof(t));
+  header.hdr_size = t >> 4;
+  header.ns = (uint8_t) (t & 0x0F);
+  stream.read((char *) &header.flags, sizeof(header.flags));
+  stream.read((char *) &header.win_size, sizeof(header.win_size));
+  stream.read((char *) &header.checksum, sizeof(header.checksum));
+  stream.read((char *) &header.urg_ptr, sizeof(header.urg_ptr));
+  if (ntoh) {
+    header.src_port = ntohs(header.src_port);
+    header.dst_port = ntohs(header.dst_port);
+    header.seq_num = ntohl(header.seq_num);
+    header.ack_num = ntohl(header.ack_num);
+    header.win_size = ntohs(header.win_size);
+    header.checksum = ntohs(header.checksum);
+    header.urg_ptr = ntohs(header.urg_ptr);
+  }
+  if (header.hdr_size > 5) {
+    // we have options in header
+    auto options = (header.hdr_size - 5) * sizeof(uint32_t);
+    char *buffer = new char[options];
+    stream.read(buffer, options);
+    std::stringstream ss;
+    for (int i = 0; i < options; ++i) {
+      ss << std::hex << std::setw(2) << std::setfill('0') << unsigned((uint8_t) buffer[i]);
+    }
+    std::string mystr = ss.str();
+    header.options = mystr;
+  }
+  return header;
+}
+
+size_t tcp_header_t::size() const {
+  return hdr_size * sizeof(uint32_t);
+}
+
+bool tcp_header_t::ack() const {
+  return (flags & 0x10) == 1;
+}
+
+bool tcp_header_t::cwr() const {
+  return (flags & 0x80) == 1;
+}
+
+bool tcp_header_t::ece() const {
+  return (flags & 0x40) == 1;
+}
+
+bool tcp_header_t::fin() const {
+  return (flags & 0x01) == 1;
+}
+
+bool tcp_header_t::rst() const {
+  return (flags & 0x04) == 1;
+}
+
+bool tcp_header_t::syn() const {
+  return (flags & 0x02) == 1;
+}
+
+bool tcp_header_t::psh() const {
+  return (flags & 0x04) == 1;
+}
+
+
+bool tcp_header_t::urg() const {
+  return (flags & 0x20) == 1;
 }
 
 }

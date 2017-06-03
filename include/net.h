@@ -51,7 +51,7 @@ struct ipv4_header_t {
   uint16_t checksum;
   addr_t src_addr;
   addr_t dst_addr;
-  void* options;
+  std::string options;
   uint8_t ihl() const;
   size_t size() const;
   void dump() {
@@ -67,6 +67,9 @@ struct ipv4_header_t {
     ::dump("checksum", checksum);
     ::dump("src_addr", src_addr);
     ::dump("dst_addr", dst_addr);
+    if (options.length() > 0) {
+      std::cout << "options in hex: " << options << std::endl;
+    }
     std::cout << "===== end of IPv4 header =====" << std::endl << std::endl;
 #endif
   }
@@ -83,7 +86,7 @@ struct ipv6_header_t {
       version : 4,
       traffic_class : 8,
       flow_label : 20;
-  uint16_t length;
+  uint16_t payload_length;
   uint8_t next_header;
   uint8_t hop_limit;
   struct in6_addr src;
@@ -94,7 +97,7 @@ struct ipv6_header_t {
     ::dump("version", version);
     ::dump("traffic_class", traffic_class);
     ::dump("flow_label", flow_label);
-    ::dump("length", length);
+    ::dump("payload_length", payload_length);
     ::dump("next_header", next_header);
     ::dump("hop_limit", hop_limit);
     std::cout << "src_addr: " << std::hex << src.left << " " << src.right << std::endl;
@@ -120,6 +123,50 @@ class udp_header_t {
     std::cout << "===== end of UDP header =====" << std::endl << std::endl;
 #endif
   }
+};
+
+class tcp_header_t {
+ public:
+  port_t src_port;
+  port_t dst_port;
+  uint32_t seq_num; /* sequence number */
+  uint32_t ack_num; /* acknowledgment number */
+  uint8_t
+      hdr_size : 4,
+      ns : 4;
+  uint8_t flags; /* tcp flags */
+  uint16_t win_size; /* window size */
+  uint16_t checksum; /* checksum */
+  uint16_t urg_ptr; /* urgent pointer */
+  std::string options;
+  bool cwr() const;
+  bool ece() const;
+  bool urg() const;
+  bool ack() const;
+  bool psh() const;
+  bool rst() const;
+  bool syn() const;
+  bool fin() const;
+  void dump() {
+#ifdef MY_DEBUG
+    std::cout << std::endl << "=====     TCP header    =====" << std::endl;
+    std::cout << "src_port: " << src_port << std::endl;
+    std::cout << "dst_port: " << dst_port << std::endl;
+    ::dump("seq_num", seq_num);
+    ::dump("ack_num", ack_num);
+    ::dump("hdr_size", hdr_size);
+    ::dump("ns", ns);
+    ::dump("flags", flags);
+    ::dump("win_size", win_size);
+    ::dump("check_sum", checksum);
+    ::dump("urg_ptr", urg_ptr);
+    if (options.length() != 0) {
+      std::cout << "options: " << options << std::endl;
+    }
+    std::cout << "===== end of TCP header =====" << std::endl << std::endl;
+#endif
+  }
+  size_t size() const;
 };
 
 template<typename T>

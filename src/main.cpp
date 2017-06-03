@@ -83,7 +83,7 @@ int main(int argc,
 //    printf("%x %x %x %x ", key[4 * i + 0], key[4 * i + 1], key[4 * i + 2], key[4 * i + 3]);
 //  }
   PcapEncoder pcapEncoder;
-  pcapEncoder.read("test.pcap");
+  pcapEncoder.read("test2.pcap");
 
   return 0;
 }

@@ -43,8 +43,8 @@ class PcapEncoder {
       std::cout << std::endl << "===== PCAP packet header ===== " << std::endl;
       ::dump("ts_sec", ts_sec);
       ::dump("ts_usec", ts_usec);
-      ::dump("incl_len", incl_len);
-      ::dump("orig_len", orig_len);
+      std::cout << "incl_len: " << incl_len << std::endl;
+      std::cout << "orig_len: " << orig_len << std::endl;
       std::cout << "===== end of PCAP packet header ===== " << std::endl << std::endl;
 #endif
     }
@@ -60,7 +60,7 @@ class PcapEncoder {
     port_t src_port;
     port_t dst_port;
 
-    char *data;                /* packet data */
+    std::string data;                /* packet data */
   } Packet;
   /**
    * read the file header of pcap file
@@ -80,6 +80,9 @@ class PcapEncoder {
    * @return @see pcaprec_hdr_t
    */
   pcaprec_hdr_t read_pcap_packet_header(std::istream &stream);
+  std::string convert_data(char *buffer, int size) const;
+
+  std::string read_data(std::istream &stream, int size);
  public:
   /**
    * Read a pcap format file
