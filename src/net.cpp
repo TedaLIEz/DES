@@ -183,9 +183,34 @@ bool tcp_header_t::psh() const {
   return (flags & 0x04) == 1;
 }
 
-
 bool tcp_header_t::urg() const {
   return (flags & 0x20) == 1;
+}
+
+std::string to_string(const addr_t &addr) {
+  auto ip1 = addr & 0xFF;
+  auto ip2 = (addr >> 8) & 0xFF;
+  auto ip3 = (addr >> 16) & 0xFF;
+  auto ip4 = (addr >> 24) & 0xFF;
+  std::stringstream ss;
+  ss << ip4 << "." << ip3 << "." << ip2 << "." << ip1;
+  return ss.str();
+
+}
+
+std::string to_string(const in6_addr &addr) {
+  std::stringstream ss;
+  auto ip8 = addr.right & 0xFFFF;
+  auto ip7 = (addr.right >> 16) & 0xFFFF;
+  auto ip6 = (addr.right >> 32) & 0xFFFF;
+  auto ip5 = (addr.right >> 48) & 0xFFFF;
+  auto ip4 = (addr.left & 0xFFFF);
+  auto ip3 = (addr.left >> 16) & 0xFFFF;
+  auto ip2 = (addr.left >> 32) & 0xFFFF;
+  auto ip1 = (addr.left >> 48) & 0xFFFF;
+  ss << std::hex << std::setw(4) << std::setfill('0') <<
+  ip1 << "." << ip2 << "." << ip3 << "." << ip4 << "." << ip5 << "." << ip6 << "." << ip7 << "." << ip8;
+  return ss.str();
 }
 
 }

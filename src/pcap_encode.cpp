@@ -16,11 +16,12 @@ int PcapEncoder::read(const std::string filename) {
   // TODO: read packet one by one and do filter
   int packet_size = 1;
   while (in.peek() != EOF) {
-    std::cout << "packet " << packet_size++  << std::endl;
     auto p = read_packet(in);
-    if (p.type) {
-      std::cout << "data\n" << p.data << std::endl << std::endl;
+    if (p.type != pType::OTHERS) {
+      std::cout << "packet " << packet_size << std::endl;
+      p.dump();
     }
+    packet_size++;
   }
   // we have a end of line here
   assert(in.eof());
@@ -73,6 +74,8 @@ PcapEncoder::Packet PcapEncoder::read_packet(std::istream &stream) {
     // ipv4 in network layer
     Net::ipv4_header_t ipv4_hdr = Net::load<Net::ipv4_header_t>(stream);
     ipv4_hdr.dump();
+    packet.src_addr = Net::to_string(ipv4_hdr.src_addr);
+    packet.dst_addr = Net::to_string(ipv4_hdr.dst_addr);
     if (ipv4_hdr.protocol == IP_TCP_PROTOCOL) {
       // tcp protocol
       Net::tcp_header_t tcp_hdr = Net::load<Net::tcp_header_t>(stream);
@@ -82,10 +85,14 @@ PcapEncoder::Packet PcapEncoder::read_packet(std::istream &stream) {
       // we have padding in ethernet frame,
       // see http://forums.devshed.com/networking-help-109/tcp-protocol-mysterious-6-null-byte-payload-303357.html
       // and https://stackoverflow.com/a/23998612/4380801
+#ifdef MY_DEBUG
       std::cout << "padding " << padding << std::endl;
+#endif
       packet.data = read_data(stream, (int) bytes);
+      packet.src_port = tcp_hdr.src_port;
+      packet.dst_port = tcp_hdr.dst_port;
       stream.seekg(padding, stream.cur);
-      packet.type = 1;
+      packet.type = pType::TCP;
     } else if (ipv4_hdr.protocol == IP_UDP_PROTOCOL) {
       // udp protocol
       Net::udp_header_t udp_hdr = Net::load<Net::udp_header_t>(stream);
@@ -94,22 +101,27 @@ PcapEncoder::Packet PcapEncoder::read_packet(std::istream &stream) {
       auto bytes = udp_hdr.length - 8;
       // currently we read data into string in hex
       packet.data = read_data(stream, bytes);
-      packet.type = 1;
+      packet.src_port = udp_hdr.src_port;
+      packet.dst_port = udp_hdr.dst_port;
+      packet.type = pType::UDP;
     } else {
       // other transmission layer protocol, ignore them
-      std::cout << "ipv4 header len " << ipv4_hdr.size() << std::endl;
 
       stream.seekg(packet_hdr.incl_len - sizeof(eth_hdr) - ipv4_hdr.size(), stream.cur);
     }
   } else if (eth_hdr.llc_len == ETH_IPV6) {
     Net::ipv6_header_t ipv6_hdr = Net::load<Net::ipv6_header_t>(stream);
     ipv6_hdr.dump();
+    packet.src_addr = Net::to_string(ipv6_hdr.src);
+    packet.dst_addr = Net::to_string(ipv6_hdr.dst);
     if (ipv6_hdr.next_header == IP_TCP_PROTOCOL) {
       Net::tcp_header_t tcp_hdr = Net::load<Net::tcp_header_t>(stream);
       tcp_hdr.dump();
       auto bytes = ipv6_hdr.payload_length - tcp_hdr.size();
       packet.data = read_data(stream, (int) bytes);
-      packet.type = 1;
+      packet.src_port = tcp_hdr.src_port;
+      packet.dst_port = tcp_hdr.dst_port;
+      packet.type = pType::TCP;
     } else if (ipv6_hdr.next_header == IP_UDP_PROTOCOL) {
       Net::udp_header_t udp_hdr = Net::load<Net::udp_header_t>(stream);
       udp_hdr.dump();
@@ -117,13 +129,15 @@ PcapEncoder::Packet PcapEncoder::read_packet(std::istream &stream) {
       auto bytes = udp_hdr.length - 8;
       // currently we read data into string in hex
       packet.data = read_data(stream, bytes);
-      packet.type = 1;
+      packet.src_port = udp_hdr.src_port;
+      packet.dst_port = udp_hdr.dst_port;
+      packet.type = pType::UDP;
     } else {
       // other transmission layer protocol, ignore them
       stream.seekg(packet_hdr.incl_len - sizeof(ipv6_hdr) - sizeof(eth_hdr), stream.cur);
     }
   } else {
-    packet.type = 0;
+    packet.type = pType::OTHERS;
     stream.seekg(packet_hdr.incl_len - sizeof(eth_hdr), stream.cur);
     // other network layer protocol, ignore them
 #ifdef MY_DEBUG

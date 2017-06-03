@@ -53,14 +53,38 @@ class PcapEncoder {
   /**
    * Packet used in code
    */
+  enum class pType : char { TCP = 1, UDP = 2, OTHERS = 3 };
   typedef struct _Packet {
     // TODO: hashcode for this struct
     pcaprec_hdr_t hdr;         /* packet header */
-    uint8_t type;              /* 1 for tcp, 2 for udp, 0 for others */
+    pType type;              /* 1 for tcp, 2 for udp, 0 for others */
     port_t src_port;
     port_t dst_port;
-
+    std::string src_addr;
+    std::string dst_addr;
     std::string data;                /* packet data */
+    void dump() {
+      std::cout << std::endl << "===== Packet =====" << std::endl;
+      std::cout << "src_addr: " << src_addr << std::endl;
+      std::cout << "dst_addr: " << dst_addr << std::endl;
+      std::cout << "src_port: " << src_port << std::endl;
+      std::cout << "dst_port: " << dst_port << std::endl;
+      std::string t;
+      switch (type) {
+        case pType::TCP :
+          t = "TCP";
+          break;
+        case pType::UDP:
+          t = "UDP";
+          break;
+        default:
+          t = "Others";
+          break;
+      }
+      std::cout << "transmission layer protocol: " << t << std::endl;
+      std::cout << "data: " << data << std::endl;
+      std::cout << "===== End of packet =====" << std::endl << std::endl;
+    }
   } Packet;
   /**
    * read the file header of pcap file

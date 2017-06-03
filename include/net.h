@@ -173,6 +173,7 @@ template<typename T>
 T load(std::istream &stream, bool ntoh = true);
 
 std::string to_string(const addr_t &addr);
+std::string to_string(const in6_addr &addr);
 }
 
 #endif //DES_NET_H
