@@ -9,6 +9,11 @@
 #include <string>
 #include "helper.h"
 class PcapEncoder {
+ private:
+  /**
+   * Packet used in code
+   */
+  enum class pType : char { TCP = 1, UDP = 2, OTHERS = 3 };
   using port_t = uint16_t;
   typedef struct pcap_hdr_s {
     uint32_t magic_number;   /* magic number */
@@ -50,10 +55,8 @@ class PcapEncoder {
     }
   } pcaprec_hdr_t;
 
-  /**
-   * Packet used in code
-   */
-  enum class pType : char { TCP = 1, UDP = 2, OTHERS = 3 };
+ public:
+
   typedef struct _Packet {
     // TODO: hashcode for this struct
     pcaprec_hdr_t hdr;         /* packet header */
@@ -85,7 +88,30 @@ class PcapEncoder {
       std::cout << "data: " << data << std::endl;
       std::cout << "===== End of packet =====" << std::endl << std::endl;
     }
+    bool operator==(const _Packet& other) {
+      return type == other.type && src_port == other.src_port
+          && dst_port == other.dst_port && src_addr == other.src_addr
+          && dst_addr == other.dst_addr;
+
+    }
   } Packet;
+  /**
+   * Read a pcap format file
+   * @param filename filepath of the pcap file
+   * @return <tt>0</tt> if read success, other val if falied
+   */
+  int read(const std::string filename);
+
+ private:
+
+
+
+
+
+
+
+
+
   /**
    * read the file header of pcap file
    * @param stream input file stream
@@ -107,13 +133,7 @@ class PcapEncoder {
   std::string convert_data(char *buffer, int size) const;
 
   std::string read_data(std::istream &stream, int size);
- public:
-  /**
-   * Read a pcap format file
-   * @param filename filepath of the pcap file
-   * @return <tt>0</tt> if read success, other val if falied
-   */
-  int read(const std::string filename);
+
 };
 
 #endif //DES_PCAP_ENCODE_H

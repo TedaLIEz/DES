@@ -6,6 +6,7 @@
 #include <fstream>
 #include <assert.h>
 #include "net.h"
+#include "hash.h"
 int PcapEncoder::read(const std::string filename) {
   std::ifstream in(filename, std::ios::binary);
   if (!in) {
@@ -19,6 +20,7 @@ int PcapEncoder::read(const std::string filename) {
     auto p = read_packet(in);
     if (p.type != pType::OTHERS) {
       std::cout << "packet " << packet_size << std::endl;
+      std::cout << "hashCode: " << std::hash<Packet>{}(p) << std::endl << std::endl;
       p.dump();
     }
     packet_size++;
