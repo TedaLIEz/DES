@@ -13,11 +13,25 @@ struct hash<PcapEncoder::Packet> {
     size_t const h2(std::hash<std::string>{}(s.dst_addr));
     size_t const h3(std::hash<uint16_t>{}(s.src_port));
     size_t const h4(std::hash<uint16_t>{}(s.dst_port));
-    size_t result(0);
-    result = 37 * result + h1;
-    result = 37 * result + h2;
-    result = 37 * result + h3;
-    result = 37 * result + h4;
+    size_t result(17);
+    if (h1 < h2) {
+      result = 31 * result + h1;
+      result = 31 * result + h2;
+    } else {
+      result = 31 * result + h2;
+      result = 31 * result + h1;
+    }
+    if (h3 < h4) {
+      result = 31 * result + h3;
+      result = 31 * result + h4;
+    } else {
+      result = 31 * result + h4;
+      result = 31 * result + h3;
+    }
+//    result = 37 * result + h1;
+//    result = 37 * result + h2;
+//    result = 37 * result + h3;
+//    result = 37 * result + h4;
     return result;
   }
 };

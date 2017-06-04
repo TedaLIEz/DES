@@ -7,6 +7,8 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <unordered_map>
+#include <vector>
 #include "helper.h"
 class PcapEncoder {
  private:
@@ -57,15 +59,22 @@ class PcapEncoder {
 
  public:
 
+  // packet structure used for future indexing
   typedef struct _Packet {
-    // TODO: hashcode for this struct
-    pcaprec_hdr_t hdr;         /* packet header */
-    pType type;              /* 1 for tcp, 2 for udp, 0 for others */
+    // TODO: add mac addr to this struct
+    uint32_t ts;               /* unix timestamp for this packet */
+    pType type = pType::OTHERS;              /* 1 for tcp, 2 for udp, 0 for others */
     port_t src_port;
     port_t dst_port;
     std::string src_addr;
     std::string dst_addr;
-    std::string data;                /* packet data */
+    uint32_t seq_num = 0; /* sequence number used in tcp packet */
+    uint32_t ack_num = 0; /* acknowledgment number used in tcp packet */
+    std::string data;     /* packet data */
+    size_t data_len;
+    size_t hashcode = 0;      /* hashcode of this packet */
+    char* ori_data;
+    size_t ori_len;       /* whole len of pcap packet */
     void dump() {
       std::cout << std::endl << "===== Packet =====" << std::endl;
       std::cout << "src_addr: " << src_addr << std::endl;
@@ -86,6 +95,13 @@ class PcapEncoder {
       }
       std::cout << "transmission layer protocol: " << t << std::endl;
       std::cout << "data: " << data << std::endl;
+      std::stringstream ss;
+      for (int i = 0; i < ori_len; ++i) {
+        ss << std::hex << std::setw(2) << std::setfill('0') << unsigned((uint8_t) ori_data[i]);
+      }
+      std::string mystr = ss.str();
+      std::cout << "origin: data: " << mystr << std::endl;
+      std::cout << "hashcode: " << hashcode << std::endl;
       std::cout << "===== End of packet =====" << std::endl << std::endl;
     }
     bool operator==(const _Packet& other) {
@@ -100,18 +116,24 @@ class PcapEncoder {
    * @param filename filepath of the pcap file
    * @return <tt>0</tt> if read success, other val if falied
    */
-  int read(const std::string filename);
+  int analyze_pcap(const std::string filename);
+
 
  private:
 
 
 
 
+  pcap_hdr_t pcap_hdr;
+  std::unordered_map<size_t, std::vector<Packet>> udp_map;
+  std::unordered_map<size_t, std::vector<Packet>> tcp_map;
 
+  void reassemble_udp_packet(Packet &packet);
 
+  void reassemble_tcp_packet(Packet &packet);
+  void assemble(std::ofstream &os);
 
-
-
+  void save_to_pcap();
   /**
    * read the file header of pcap file
    * @param stream input file stream
@@ -130,10 +152,16 @@ class PcapEncoder {
    * @return @see pcaprec_hdr_t
    */
   pcaprec_hdr_t read_pcap_packet_header(std::istream &stream);
-  std::string convert_data(char *buffer, int size) const;
+  std::string convert_data(char *buffer, size_t size) const;
 
-  std::string read_data(std::istream &stream, int size);
+  std::string read_data(std::istream &stream, size_t size);
 
+  void filter(Packet &packet);
+  friend bool operator< (const Packet &i, const Packet &j) {
+    return i.ts < j.ts;
+  }
 };
+
+
 
 #endif //DES_PCAP_ENCODE_H
