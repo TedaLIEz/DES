@@ -9,6 +9,7 @@
 #include <iomanip>
 #define FILE_NOT_FOUND 1
 #define FILE_OPEN_ERROR 2
+#define FILE_CREATE_ERROR 3
 inline void printbinary(uint64_t n) {
   std::bitset<64> a(n);
   std::cout << a << std::endl;

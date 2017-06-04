@@ -127,10 +127,10 @@ class PcapEncoder {
   void reassemble_udp_packet(Packet &packet);
 
   void reassemble_tcp_packet(Packet &packet);
-  void assemble();
 
-  void save_to_pcap();
-  void save_to_txt();
+  int save_to_pcap();
+  int save_tcp_txt(const std::string filename);
+  int save_udp_txt(const std::string filename);
   /**
    * read the file header of pcap file
    * @param stream input file stream

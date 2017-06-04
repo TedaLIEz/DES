@@ -18,21 +18,20 @@ int PcapEncoder::analyze_pcap(const std::string filename) {
   // TODO: read packet one by one and do filter
   while (in.peek() != EOF) {
     auto p = read_packet(in);
-    p.dump();
     filter(p);
   }
 
-  assemble();
   save_to_pcap();
-
+  auto found = filename.find_last_of(".");
+  auto substr = filename.substr(0, found);
+  save_tcp_txt(substr);
+  save_udp_txt(substr);
   // we have a end of line here
   assert(in.eof());
   in.close();
   return 0;
 }
 
-void PcapEncoder::assemble() {
-}
 
 void PcapEncoder::filter(Packet &packet) {
   if (packet.type == pType::UDP) {
@@ -42,43 +41,102 @@ void PcapEncoder::filter(Packet &packet) {
   }
 }
 
-void PcapEncoder::save_to_pcap() {
-  IO::pcap::save_pcap("UDP", pcap_hdr, udp_map);
-  IO::pcap::save_pcap("TCP", pcap_hdr, tcp_map);
-
-
+int PcapEncoder::save_to_pcap() {
+  int rst1 = IO::save_pcap("UDP", pcap_hdr, udp_map);
+  int rst2 = IO::save_pcap("TCP", pcap_hdr, tcp_map);
+  if (!rst1 && !rst2) {
+    return 0;
+  } else {
+    return FILE_OPEN_ERROR;
+  }
 }
 
-void PcapEncoder::save_to_txt() {
-  // TODO: save to tcp packet
-  IO::txt::save_udp_txt(udp_map);
+int PcapEncoder::save_udp_txt(const std::string filename) {
+  auto outpath = filename + "_udp.txt";
+  if (std::ifstream(outpath)) {
+    std::remove(outpath.c_str());
+  }
+  std::ofstream stream(outpath);
+  if (!stream) {
+    return FILE_CREATE_ERROR;
+  }
+  for (auto it : udp_map) {
+    if (!it.second.empty()) {
+      for (auto e : it.second) {
+#ifdef MY_DEBUG
+        std::cout << "time " << e.ts << std::endl;
+        std::cout << "src " << e.src_addr << ":" << e.src_port << std::endl;
+        std::cout << "dst " << e.dst_addr << ":" << e.dst_port << std::endl;
+#endif
+        stream << "time " << e.ts << std::endl;
+        stream << "src " << e.src_addr << ":" << e.src_port << std::endl;
+        stream << "dst " << e.dst_addr << ":" << e.dst_port << std::endl;
+        stream.write(e.data, e.data_len);
+        stream << "\n\n";
+      }
+    }
+  }
+  stream.close();
+  return 0;
+}
+
+int PcapEncoder::save_tcp_txt(const std::string filename) {
+  auto outpath = filename + "_tcp.txt";
+  if (std::ifstream(outpath)) {
+    std::remove(outpath.c_str());
+  }
+  std::ofstream stream(outpath);
+  if (!stream) {
+    return FILE_CREATE_ERROR;
+  }
+  for (auto it : tcp_map) {
+    if (!it.second.empty() && (it.second[0].src_port == 80 || it.second[0].dst_port == 80)) {
+      auto p = it.second[0];
+      for (auto v : it.second) {
+        stream << "time " << v.ts << std::endl;
+        stream << "src " << v.src_addr << ":" << v.src_port << std::endl;
+        stream << "dst " << v.dst_addr << ":" << v.dst_port << std::endl;
+        if (v.data_len != 0) {
+          stream.write(v.data, v.data_len);
+        }
+        stream << std::endl;
+      }
+    }
+  }
+  stream.close();
+  return 0;
 }
 
 void PcapEncoder::reassemble_tcp_packet(Packet &packet) {
-  auto it = tcp_map.find(packet.hashcode);
-  if (it == tcp_map.end()) {
+  if (tcp_map.find(packet.hashcode) == tcp_map.end()) {
     tcp_map[packet.hashcode] = std::vector<Packet>();
   }
   std::vector<Packet> *v = &tcp_map[packet.hashcode];
   if (v->empty()) {
     v->push_back(packet);
   }
-  if (v->back().dst_addr == packet.dst_addr) {
+  if (v->back().dst_addr.compare(packet.dst_addr) == 0) {
+    // The packet behind the last packet in vector
     if (v->back().seq_num + v->back().data_len <= packet.seq_num) {
       v->push_back(packet);
-    } else {
-      for (int i = (int) (v->size() - 2); i >= 0; i--) {
-        if ((*v)[i].dst_addr == packet.dst_addr
+    }
+      // Find the position where the packet should be
+    else {
+      for (int i = v->size() - 2; i >= 0; i--) {
+        if ((*v)[i].dst_addr.compare(packet.dst_addr) == 0
             && (*v)[i].seq_num + (*v)[i].data_len <= packet.seq_num) {
           v->insert(v->begin() + i + 1, packet);
           break;
         }
+        // If have not match, throw the packet
       }
     }
-  } else {
-    if (v->back().ack_num == packet.ack_num) {
+  }
+  else {
+    if (v->back().ack_num == packet.seq_num) {
       v->push_back(packet);
     }
+    // Else throw the packet
   }
 
 }
@@ -118,7 +176,7 @@ PcapEncoder::pcaprec_hdr_t PcapEncoder::read_pcap_packet_header(std::istream &st
   return header;
 }
 
-void PcapEncoder::read_data(std::istream &stream, size_t size, char* buffer) {
+void PcapEncoder::read_data(std::istream &stream, size_t size, char *buffer) {
 #ifdef MY_DEBUG
   std::cout << "data size " << size << std::endl;
 #endif
