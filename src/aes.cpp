@@ -291,7 +291,6 @@ void AES::key_expansion(uint8_t *key, uint8_t *w) {
 
 void AES::cipher(uint8_t *in, uint8_t *out) {
   uint8_t* state = new uint8_t[4 * Nb];
-//  uint8_t state[4 * Nb];
   uint8_t r, i, j;
 
   for (i = 0; i < 4; i++) {
@@ -323,7 +322,6 @@ void AES::cipher(uint8_t *in, uint8_t *out) {
 void AES::decipher(uint8_t *in, uint8_t *out) {
 
   uint8_t* state = new uint8_t[4 * Nb];
-//  uint8_t state[4 * Nb];
   uint8_t r, i, j;
 
   for (i = 0; i < 4; i++) {

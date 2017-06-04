@@ -10,7 +10,6 @@
 #include "io.h"
 int PcapEncoder::analyze_pcap(const std::string filename) {
   std::ifstream in(filename, std::ios::binary);
-//  std::ofstream out(filename + ".txt");
   if (!in) {
     return FILE_NOT_FOUND;
   }
@@ -23,16 +22,16 @@ int PcapEncoder::analyze_pcap(const std::string filename) {
     filter(p);
   }
 
-//  assemble(out);
+  assemble();
   save_to_pcap();
+
   // we have a end of line here
   assert(in.eof());
   in.close();
   return 0;
 }
 
-void PcapEncoder::assemble(std::ofstream &os) {
-
+void PcapEncoder::assemble() {
 }
 
 void PcapEncoder::filter(Packet &packet) {
@@ -45,7 +44,14 @@ void PcapEncoder::filter(Packet &packet) {
 
 void PcapEncoder::save_to_pcap() {
   IO::pcap::save_pcap("UDP", pcap_hdr, udp_map);
+  IO::pcap::save_pcap("TCP", pcap_hdr, tcp_map);
+
+
+}
+
+void PcapEncoder::save_to_txt() {
   // TODO: save to tcp packet
+  IO::txt::save_udp_txt(udp_map);
 }
 
 void PcapEncoder::reassemble_tcp_packet(Packet &packet) {
@@ -194,7 +200,6 @@ PcapEncoder::Packet PcapEncoder::read_packet(std::istream &stream) {
       packet.type = pType::TCP;
     } else if (ipv6_hdr.next_header == IP_UDP_PROTOCOL) {
       Net::udp_header_t udp_hdr = Net::load<Net::udp_header_t>(stream);
-//      udp_hdr.dump();
       // udp data size in bytes
       size_t bytes = (size_t) (udp_hdr.length - 8);
       // currently we read data into string in hex

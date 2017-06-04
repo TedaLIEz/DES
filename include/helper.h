@@ -131,4 +131,15 @@ inline std::string convert_data(char *buffer, size_t size) {
   return mystr;
 }
 
+
+inline std::string timeStampToHReadble(const time_t rawtime)
+{
+  struct tm *tm = localtime(&rawtime);
+  char date[30];
+  strftime(date, sizeof(date),"%A %c", tm);
+
+  return std::string(date);
+}
+
+
 #endif //DES_HELPER_H

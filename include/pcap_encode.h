@@ -46,7 +46,6 @@ class PcapEncoder {
     uint32_t snaplen;        /* max length of captured packets, in octets */
     uint32_t network;        /* data link type */
     void dump() {
-#ifdef MY_DEBUG
       std::cout << std::endl << "===== PCAP file header ===== " << std::endl;
       ::dump("magic_number", magic_number);
       ::dump("version major", version_major);
@@ -56,7 +55,6 @@ class PcapEncoder {
       ::dump("snaplen", snaplen);
       ::dump("network", network);
       std::cout << "===== end of PCAP file header =====" << std::endl << std::endl;
-#endif
     }
   } pcap_hdr_t;
   // packet structure used for future indexing
@@ -77,6 +75,7 @@ class PcapEncoder {
     size_t ori_len;       /* whole len of pcap packet */
     void dump() {
       std::cout << std::endl << "===== Packet =====" << std::endl;
+      std::cout << "ts: " << ts << std::endl;
       std::cout << "src_addr: " << src_addr << std::endl;
       std::cout << "dst_addr: " << dst_addr << std::endl;
       std::cout << "src_port: " << src_port << std::endl;
@@ -128,9 +127,10 @@ class PcapEncoder {
   void reassemble_udp_packet(Packet &packet);
 
   void reassemble_tcp_packet(Packet &packet);
-  void assemble(std::ofstream &os);
+  void assemble();
 
   void save_to_pcap();
+  void save_to_txt();
   /**
    * read the file header of pcap file
    * @param stream input file stream
@@ -156,6 +156,7 @@ class PcapEncoder {
   friend bool operator< (const Packet &i, const Packet &j) {
     return i.ts < j.ts;
   }
+
 };
 
 
