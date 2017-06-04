@@ -17,6 +17,26 @@ class PcapEncoder {
    */
   enum class pType : char { TCP = 1, UDP = 2, OTHERS = 3 };
   using port_t = uint16_t;
+
+  typedef struct pcaprec_hdr_s {
+    uint32_t ts_sec;         /* timestamp seconds */
+    uint32_t ts_usec;        /* timestamp microseconds */
+    uint32_t incl_len;       /* number of octets of packet saved in file */
+    uint32_t orig_len;       /* actual length of packet */
+    void dump() {
+#ifdef MY_DEBUG
+      std::cout << std::endl << "===== PCAP packet header ===== " << std::endl;
+      ::dump("ts_sec", ts_sec);
+      ::dump("ts_usec", ts_usec);
+      std::cout << "incl_len: " << incl_len << std::endl;
+      std::cout << "orig_len: " << orig_len << std::endl;
+      std::cout << "===== end of PCAP packet header ===== " << std::endl << std::endl;
+#endif
+    }
+  } pcaprec_hdr_t;
+
+ public:
+
   typedef struct pcap_hdr_s {
     uint32_t magic_number;   /* magic number */
     uint16_t version_major;  /* major version number */
@@ -39,26 +59,6 @@ class PcapEncoder {
 #endif
     }
   } pcap_hdr_t;
-
-  typedef struct pcaprec_hdr_s {
-    uint32_t ts_sec;         /* timestamp seconds */
-    uint32_t ts_usec;        /* timestamp microseconds */
-    uint32_t incl_len;       /* number of octets of packet saved in file */
-    uint32_t orig_len;       /* actual length of packet */
-    void dump() {
-#ifdef MY_DEBUG
-      std::cout << std::endl << "===== PCAP packet header ===== " << std::endl;
-      ::dump("ts_sec", ts_sec);
-      ::dump("ts_usec", ts_usec);
-      std::cout << "incl_len: " << incl_len << std::endl;
-      std::cout << "orig_len: " << orig_len << std::endl;
-      std::cout << "===== end of PCAP packet header ===== " << std::endl << std::endl;
-#endif
-    }
-  } pcaprec_hdr_t;
-
- public:
-
   // packet structure used for future indexing
   typedef struct _Packet {
     // TODO: add mac addr to this struct
@@ -70,10 +70,10 @@ class PcapEncoder {
     std::string dst_addr;
     uint32_t seq_num = 0; /* sequence number used in tcp packet */
     uint32_t ack_num = 0; /* acknowledgment number used in tcp packet */
-    std::string data;     /* packet data */
-    size_t data_len;
+    char* data;     /* packet data */
+    size_t data_len; /* length of packet data */
     size_t hashcode = 0;      /* hashcode of this packet */
-    char* ori_data;
+    char* ori_data;       /* whole data of this pcap packet, including pcap_packet_header */
     size_t ori_len;       /* whole len of pcap packet */
     void dump() {
       std::cout << std::endl << "===== Packet =====" << std::endl;
@@ -94,13 +94,10 @@ class PcapEncoder {
           break;
       }
       std::cout << "transmission layer protocol: " << t << std::endl;
-      std::cout << "data: " << data << std::endl;
-      std::stringstream ss;
-      for (int i = 0; i < ori_len; ++i) {
-        ss << std::hex << std::setw(2) << std::setfill('0') << unsigned((uint8_t) ori_data[i]);
-      }
-      std::string mystr = ss.str();
-      std::cout << "origin: data: " << mystr << std::endl;
+      auto s = convert_data(data, data_len);
+      s = s.length() == 0 ? "no data" : s;
+      std::cout << "data: " <<  s << std::endl;
+      std::cout << "origin: data: " << convert_data(ori_data, ori_len) << std::endl;
       std::cout << "hashcode: " << hashcode << std::endl;
       std::cout << "===== End of packet =====" << std::endl << std::endl;
     }
@@ -152,9 +149,8 @@ class PcapEncoder {
    * @return @see pcaprec_hdr_t
    */
   pcaprec_hdr_t read_pcap_packet_header(std::istream &stream);
-  std::string convert_data(char *buffer, size_t size) const;
 
-  std::string read_data(std::istream &stream, size_t size);
+  void read_data(std::istream &stream, size_t size, char* buffer);
 
   void filter(Packet &packet);
   friend bool operator< (const Packet &i, const Packet &j) {

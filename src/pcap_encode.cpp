@@ -7,6 +7,7 @@
 #include <assert.h>
 #include "net.h"
 #include "hash.h"
+#include "io.h"
 int PcapEncoder::analyze_pcap(const std::string filename) {
   std::ifstream in(filename, std::ios::binary);
 //  std::ofstream out(filename + ".txt");
@@ -18,9 +19,7 @@ int PcapEncoder::analyze_pcap(const std::string filename) {
   // TODO: read packet one by one and do filter
   while (in.peek() != EOF) {
     auto p = read_packet(in);
-//    if (p.type == pType::TCP) {
     p.dump();
-//    }
     filter(p);
   }
 
@@ -29,7 +28,6 @@ int PcapEncoder::analyze_pcap(const std::string filename) {
   // we have a end of line here
   assert(in.eof());
   in.close();
-//  out.close();
   return 0;
 }
 
@@ -46,24 +44,8 @@ void PcapEncoder::filter(Packet &packet) {
 }
 
 void PcapEncoder::save_to_pcap() {
-  for (auto it : udp_map) {
-    if (!it.second.empty()) {
-      auto p = it.second[0];
-      std::ostringstream oss;
-      if (p.src_addr < p.dst_addr) {
-        oss << "UDP[" << p.src_addr << "][" << p.src_port << "][" << p.dst_addr << "][" << p.dst_port << "]";
-      } else {
-        oss << "UDP[" << p.dst_addr << "][" << p.dst_port << "][" << p.src_addr << "][" << p.src_port << "]";
-      }
-      oss << ".pcap";
-      std::ofstream out(oss.str());
-      out.write(static_cast<char *>(static_cast<void *>(&pcap_hdr)), sizeof(pcap_hdr_t));
-      for (auto e : it.second) {
-        out.write(e.ori_data, e.ori_len);
-      }
-      out.close();
-    }
-  }
+  IO::pcap::save_pcap("UDP", pcap_hdr, udp_map);
+  // TODO: save to tcp packet
 }
 
 void PcapEncoder::reassemble_tcp_packet(Packet &packet) {
@@ -130,32 +112,23 @@ PcapEncoder::pcaprec_hdr_t PcapEncoder::read_pcap_packet_header(std::istream &st
   return header;
 }
 
-std::string PcapEncoder::read_data(std::istream &stream, size_t size) {
+void PcapEncoder::read_data(std::istream &stream, size_t size, char* buffer) {
 #ifdef MY_DEBUG
   std::cout << "data size " << size << std::endl;
 #endif
-  char *buffer = new char[size];
   stream.read(buffer, size);
-  auto rst = convert_data(buffer, size);
-  delete[] buffer;
-  return rst;
 }
 
 PcapEncoder::Packet PcapEncoder::read_packet(std::istream &stream) {
-  // TODO: implement reading data into a packet struct.
   auto curpos = stream.tellg();
   pcaprec_hdr_t packet_hdr = read_pcap_packet_header(stream);
   auto packet_len = packet_hdr.orig_len;
   stream.seekg(curpos);
-  char *buffer = new char[packet_len + sizeof(packet_hdr)];
-  stream.read(buffer, packet_len + sizeof(packet_hdr));
-
   Packet packet;
   packet.ori_len = sizeof(packet_hdr) + packet_len;
   packet.ori_data = new char[packet_len + sizeof(packet_hdr)];
-  memcpy(packet.ori_data, buffer, packet.ori_len);
+  read_data(stream, packet_len + sizeof(packet_hdr), packet.ori_data);
   stream.seekg(curpos + (std::fpos<mbstate_t>) sizeof(packet_hdr));
-  delete[] buffer;
   packet.ts = packet_hdr.ts_sec + packet_hdr.ts_usec;
   Net::ether_header_t eth_hdr = Net::load<Net::ether_header_t>(stream);
 
@@ -178,7 +151,8 @@ PcapEncoder::Packet PcapEncoder::read_packet(std::istream &stream) {
       packet.data_len = bytes;
 
       packet.type = pType::TCP;
-      packet.data = read_data(stream, (int) bytes);
+      packet.data = new char[bytes];
+      read_data(stream, bytes, packet.data);
       packet.seq_num = tcp_hdr.seq_num;
       packet.ack_num = tcp_hdr.ack_num;
       packet.src_port = tcp_hdr.src_port;
@@ -192,7 +166,8 @@ PcapEncoder::Packet PcapEncoder::read_packet(std::istream &stream) {
       size_t bytes = (size_t) (udp_hdr.length - 8);
       // currently we read data into string in hex
       packet.data_len = bytes;
-      packet.data = read_data(stream, bytes);
+      packet.data = new char[bytes];
+      read_data(stream, bytes, packet.data);
       packet.src_port = udp_hdr.src_port;
       packet.dst_port = udp_hdr.dst_port;
       packet.hashcode = std::hash<Packet>{}(packet);
@@ -208,7 +183,8 @@ PcapEncoder::Packet PcapEncoder::read_packet(std::istream &stream) {
     if (ipv6_hdr.next_header == IP_TCP_PROTOCOL) {
       Net::tcp_header_t tcp_hdr = Net::load<Net::tcp_header_t>(stream);
       auto bytes = ipv6_hdr.payload_length - tcp_hdr.size();
-      packet.data = read_data(stream, (int) bytes);
+      packet.data = new char[bytes];
+      read_data(stream, bytes, packet.data);
       packet.data_len = bytes;
       packet.src_port = tcp_hdr.src_port;
       packet.dst_port = tcp_hdr.dst_port;
@@ -223,7 +199,8 @@ PcapEncoder::Packet PcapEncoder::read_packet(std::istream &stream) {
       size_t bytes = (size_t) (udp_hdr.length - 8);
       // currently we read data into string in hex
       packet.data_len = bytes;
-      packet.data = read_data(stream, bytes);
+      packet.data = new char[bytes];
+      read_data(stream, bytes, packet.data);
       packet.src_port = udp_hdr.src_port;
       packet.dst_port = udp_hdr.dst_port;
       packet.hashcode = std::hash<Packet>{}(packet);
@@ -244,12 +221,4 @@ PcapEncoder::Packet PcapEncoder::read_packet(std::istream &stream) {
   return packet;
 }
 
-std::string PcapEncoder::convert_data(char *buffer, size_t size) const {
-  std::stringstream ss;
-  for (int i = 0; i < size; ++i) {
-    ss << std::hex << std::setw(2) << std::setfill('0') << unsigned((uint8_t) buffer[i]);
-  }
-  std::string mystr = ss.str();
-  return mystr;
-}
 

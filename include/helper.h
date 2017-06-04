@@ -121,4 +121,14 @@ void dump(const std::string tag, T t) {
             << unsigned(t) << std::endl << std::dec;
 }
 
+
+inline std::string convert_data(char *buffer, size_t size) {
+  std::stringstream ss;
+  for (int i = 0; i < size; ++i) {
+    ss << std::hex << std::setw(2) << std::setfill('0') << unsigned((uint8_t) buffer[i]);
+  }
+  std::string mystr = ss.str();
+  return mystr;
+}
+
 #endif //DES_HELPER_H
