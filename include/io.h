@@ -27,7 +27,7 @@ inline int save_pcap(const std::string prefix,
       if (std::ifstream(outputpath)) {
         std::remove(outputpath.c_str());
       }
-      std::ofstream out(oss.str());
+      std::ofstream out(oss.str(), std::ios::out | std::ios::binary);
       if (!out) {
         return FILE_CREATE_ERROR;
       }
