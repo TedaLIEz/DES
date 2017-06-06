@@ -24,8 +24,14 @@ int PcapEncoder::analyze_pcap(const std::string filename) {
   save_to_pcap();
   auto found = filename.find_last_of(".");
   auto substr = filename.substr(0, found);
-  save_tcp_txt(substr);
-  save_udp_txt(substr);
+  auto rst = save_tcp_txt(substr);
+  if (!rst) {
+    return FILE_CREATE_ERROR;
+  }
+  rst = save_udp_txt(substr);
+  if (!rst) {
+    return FILE_CREATE_ERROR;
+  }
   // we have a end of line here
   assert(in.eof());
   in.close();

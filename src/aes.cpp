@@ -454,8 +454,10 @@ int AES::decrypt(const std::string inpath, const std::string outpath) {
     }
   }
 
+#ifdef MY_DEBUG
   std::cout << "AES: file length" << length << std::endl;
   std::cout << "AES: real length " << real_len << std::endl;
+#endif
   for (int i = 0; i < (length * 8 / 128) - 4; i++) {
     in.read(block, 16);
 

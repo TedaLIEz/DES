@@ -28,10 +28,6 @@ struct hash<PcapEncoder::Packet> {
       result = 31 * result + h4;
       result = 31 * result + h3;
     }
-//    result = 37 * result + h1;
-//    result = 37 * result + h2;
-//    result = 37 * result + h3;
-//    result = 37 * result + h4;
     return result;
   }
 };

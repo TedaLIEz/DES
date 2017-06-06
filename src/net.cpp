@@ -39,7 +39,6 @@ ipv4_header_t load(std::istream &stream, bool ntoh) {
     header.dst_addr = ntohl(header.dst_addr);
   }
 
-  // TODO: deal with options in ipv4_header, review is needed
   if (header.ihl() > 5) {
     auto options = (header.ihl() - 5) * sizeof(uint32_t);
     char *buffer = new char[options];
@@ -84,7 +83,6 @@ ipv6_header_t load(std::istream &stream, bool ntoh) {
   stream.read((char *) &header.payload_length, sizeof(header.payload_length));
   stream.read((char *) &header.next_header, sizeof(header.next_header));
   stream.read((char *) &header.hop_limit, sizeof(header.hop_limit));
-  // TODO: review code
   uint64_t tmp(0);
   stream.read((char *) &tmp, 8);
   header.src.left = tmp;

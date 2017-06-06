@@ -197,12 +197,12 @@ int DAE::decrypt(const std::string filepath, const std::string outpath, const ui
       return FILE_OPEN_ERROR;
     }
   }
+#ifdef MY_DEBUG
   std::cout << "DAE: encrypted length: " << length << std::endl;
   std::cout << "DAE: real length " << real_len << std::endl;
+#endif
   for (int i = 0; i < (length / 8) - 4; i++) {
     in.read(block, 8);
-
-    //TODO: reverse order to bin
     uint64_t data = *static_cast<uint64_t*>(static_cast<void*>(block));
     uint64_t odata;
     odata = decipher(data, key);
